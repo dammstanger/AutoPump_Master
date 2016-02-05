@@ -31,6 +31,7 @@
 
 #My config
 AotoPump_slaver
+AutoPumpV2_slaver
 *.uvgui.DammStangerTS
 *.uvgui.Xiaodeng
 #*.uvopt
