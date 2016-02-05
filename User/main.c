@@ -85,35 +85,22 @@ void main()
 	DS3231_Init();
 	SI4432_Init();
 	SI4432_SetRxMode();	//接收模式
-//	ADC_Init();
-//	delay1s();
-//	SendString("ROMID Search...\r\n");
-//	SendROMID(DS18B20_SearchRomID());
-//	SendString("\r\n");					//调试信息时候用
 	//-----------------------------------------------------
 	EA = 1;								//注意：外设初始化完再开中断！
 
 	while(1)
 	{	
-		
-//		ADC_STARTCOV(ADC_CH0,ADC_SPEED_540T);
-//		delay200ms();
-//		delay200ms();
+
 //		DATA_Cmd_ACK();
 //		if(Trans_RevPakFin)
 //		{
 //			Trans_RevPakFin = 0;
 //			if(1==Pak_Handle())
-//				SendString("valid data received.\r\n");					//调试信息时候用
+//				SendString("valid data received.\r\n");		//调试信息时候用
 //		}
 		delay1s();
 		DS3231_Init();
-//		SendString("temp:\r\n");									//调试信息时候用
-//		SendTemp(DS18B20_ReadTemperature(1));
-//		SendString("\r\n");											//调试信息时候用
-//		SendString("temp::\r\n");									//调试信息时候用
-//		SendTemp(DS18B20_ReadTemperature(2));
-//		SendString("\r\n");											//调试信息时候用
+//		SendString("temp:\r\n");							//调试信息时候用
 		LED1 = 0;
 		ALARM = 0;
 		START = 0;
