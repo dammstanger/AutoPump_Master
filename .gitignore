@@ -32,6 +32,7 @@
 #My config
 AotoPump_slaver
 *.uvgui.DammStangerTS
+*.uvgui.Xiaodeng
 #*.uvopt
 #*.uvproj
 *.m51
