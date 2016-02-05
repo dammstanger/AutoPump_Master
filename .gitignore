@@ -1,0 +1,39 @@
+﻿# Object files
+*.o
+*.ko
+*.obj
+*.elf
+*.build_log.htm
+*.lnp
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Libraries
+*.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.out
+
+
+# Debug files
+*.dSYM/
+
+#My config
+AotoPump_slaver
+*.uvgui.DammStangerTS
+#*.uvopt
+#*.uvproj
+*.m51
+*.lst
+*.__i
