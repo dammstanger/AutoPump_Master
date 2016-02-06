@@ -188,8 +188,8 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\HW\DS18B20.c</PathWithFileName>
-      <FilenameWithoutPath>DS18B20.c</FilenameWithoutPath>
+      <PathWithFileName>..\HW\DS3231.c</PathWithFileName>
+      <FilenameWithoutPath>DS3231.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -201,8 +201,8 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\HW\DS3231.c</PathWithFileName>
-      <FilenameWithoutPath>DS3231.c</FilenameWithoutPath>
+      <PathWithFileName>..\HW\YXD19264D_51.c</PathWithFileName>
+      <FilenameWithoutPath>YXD19264D_51.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
@@ -248,19 +248,6 @@
       <Focus>0</Focus>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\BSP\ADC_51.c</PathWithFileName>
-      <FilenameWithoutPath>ADC_51.c</FilenameWithoutPath>
-      <RteFlg>0</RteFlg>
-      <bShared>0</bShared>
-    </File>
-    <File>
-      <GroupNumber>2</GroupNumber>
-      <FileNumber>7</FileNumber>
-      <FileType>1</FileType>
-      <tvExp>0</tvExp>
-      <Focus>0</Focus>
-      <tvExpOptDlg>0</tvExpOptDlg>
-      <bDave2>0</bDave2>
       <PathWithFileName>..\BSP\IIC_soft_51.c</PathWithFileName>
       <FilenameWithoutPath>IIC_soft_51.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
@@ -276,7 +263,7 @@
     <RteFlg>0</RteFlg>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>8</FileNumber>
+      <FileNumber>7</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
@@ -289,7 +276,7 @@
     </File>
     <File>
       <GroupNumber>3</GroupNumber>
-      <FileNumber>9</FileNumber>
+      <FileNumber>8</FileNumber>
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
@@ -297,6 +284,19 @@
       <bDave2>0</bDave2>
       <PathWithFileName>..\APP\Sensor.c</PathWithFileName>
       <FilenameWithoutPath>Sensor.c</FilenameWithoutPath>
+      <RteFlg>0</RteFlg>
+      <bShared>0</bShared>
+    </File>
+    <File>
+      <GroupNumber>3</GroupNumber>
+      <FileNumber>9</FileNumber>
+      <FileType>1</FileType>
+      <tvExp>0</tvExp>
+      <Focus>0</Focus>
+      <tvExpOptDlg>0</tvExpOptDlg>
+      <bDave2>0</bDave2>
+      <PathWithFileName>..\APP\LCD_GUI.c</PathWithFileName>
+      <FilenameWithoutPath>LCD_GUI.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>

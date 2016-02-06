@@ -22,10 +22,10 @@
 #include "UART_51.h"
 #include "SI4432.h"
 #include "Transmit.h"
-#include "DS18B20.h"
-#include "ADC_51.h"
 #include "DS3231.h"
 #include "IIC_soft_51.h"
+#include "YXD19264D_51.h"
+#include "LCD_GUI.h"
 /****************************宏定义***********************************************/
 #define P2_5	0x20
 #define P2_7	0x80
@@ -36,6 +36,9 @@
 sbit START 	= P2^7;
 sbit STOP	= P2^5;
 sbit ALARM	= P4^0;
+
+sbit TMP	= P4^4;
+
 char temp;
 char dat[] = "abc";
 /****************************函数声明*********************************************/
@@ -62,13 +65,6 @@ void EXTI0_Init()
     EX0 = 1;                        //enable INT0 interrupt
 }
 
-void JiDianQ_Init()
-{;
-	P2M0 = 0;//P2_5|P2_7;				//P2.1 P2.2强推挽
-	P2M1 = 0;
-}
-
-
 
 void main()
 {
@@ -78,16 +74,17 @@ void main()
 //	IE2 |= ESPI;
 	EXTI0_Init();                         
 	UART_Init();
-//	JiDianQ_Init();
 	SPI_Init(MASTER);
 	IIC_GPIO_Config();
+	LCD_GPIOInit();
+	LCD_Init();
 	delay1s();
 	DS3231_Init();
 	SI4432_Init();
 	SI4432_SetRxMode();	//接收模式
 	//-----------------------------------------------------
 	EA = 1;								//注意：外设初始化完再开中断！
-
+	GUI_HomePage();
 	while(1)
 	{	
 
@@ -101,11 +98,17 @@ void main()
 		delay1s();
 		DS3231_Init();
 //		SendString("temp:\r\n");							//调试信息时候用
+//		LCD_DI = 0;
+//		LCD_RW = 0;
+//		LCD_EN = 0;		
 		LED1 = 0;
 		ALARM = 0;
 		START = 0;
 		STOP = 0;
 		delay1s();
+//		LCD_DI = 1;
+//		LCD_RW = 1;
+//		LCD_EN = 1;
 		ALARM = 1;
 		START = 1;
 		STOP = 1;

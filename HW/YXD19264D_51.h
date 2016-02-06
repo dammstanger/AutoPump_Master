@@ -42,6 +42,9 @@
 //EN
 #define LCD_EN_1	LCD_EN = 1
 #define LCD_EN_0	LCD_EN = 0
+//BL
+#define LCD_BL_ON	LCD_BL = 0
+#define LCD_BL_OFF	LCD_BL = 1
 
 //复位 低电平复位 
 #define LCD_RST_1   LCD_RST = 1
@@ -78,9 +81,17 @@ extern char code CharLib_SplLabel[][16];
 extern char code Pic_Case[];
 
 /****************************变量定义*********************************************/
+sbit LCD_DI = P4^5;		//   //定义通信端口
+sbit LCD_RW = P4^1;		//   //定义通信端口
+sbit LCD_EN = P4^6;		//   //定义通信端口
 
+sbit LCD_CS1 = P4^2;		//   //定义通信端口
+sbit LCD_CS2 = P1^1;		//   //定义通信端口
+sbit LCD_CS3 = P1^2;		//   //定义通信端口
+sbit LCD_RST = P5^2;		//   //定义通信端口
+sbit LCD_BL	 = P5^3;		//	背光
 /****************************函数声明*********************************************/
-
+void LCD_GPIOInit(void);
 void LCD_Init(void);
 void LCD_Fill1(void);
 void LCD_Fill2(void);
