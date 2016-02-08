@@ -122,7 +122,13 @@ extern PAG_DATA *pag_data;
 }
 
 #define DATA_Cmd_Handle()										\
-{																\
+{																\							
+	pag_data->temp_h 	= *(Revbuf+PAG_TEMP_ADDR_H);			\
+	pag_data->temp_l 	= *(Revbuf+PAG_TEMP_ADDR_L);			\
+	pag_data->press_h	= *(Revbuf+PAG_PRESS_ADDR_H);			\
+	pag_data->press_l	= *(Revbuf+PAG_PRESS_ADDR_L);			\
+	pag_data->flow 		= *(Revbuf+PAG_FLOW_ADDR);				\
+	pag_data->possw 	= *(Revbuf+PAG_POSSW_ADDR);				\
 }
 
 #define DATA_Cmd_ACK()									\

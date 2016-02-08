@@ -42,6 +42,11 @@ sbit TMP	= P4^4;
 char temp;
 char dat[] = "abc";
 /****************************函数声明*********************************************/
+void SendTemp(uint temp);
+
+
+
+
 
 void delay200ms(void)   //误差 -0.000000000028us
 {
@@ -68,6 +73,7 @@ void EXTI0_Init()
 
 void main()
 {
+	uint tmp=0;
 	delay1s();
 	AUXR = AUXR|0x40;  	// T1, 1T Mode
 
@@ -87,36 +93,42 @@ void main()
 	GUI_HomePage();
 	while(1)
 	{	
-
-//		DATA_Cmd_ACK();
-//		if(Trans_RevPakFin)
-//		{
-//			Trans_RevPakFin = 0;
-//			if(1==Pak_Handle())
-//				SendString("valid data received.\r\n");		//调试信息时候用
-//		}
+		DATA_Cmd_Pkg_Send();
+		if(Trans_RevPakFin)
+		{
+			Trans_RevPakFin = 0;
+			if(2==Pak_Handle())
+				SendString("valid data received.\r\n");		//调试信息时候用
+				SendString("ADC data:\r\n");			
+				SendByteASCII(sensor_data.press_h);
+				SendByteASCII(sensor_data.press_l);
+				SendString("\r\n");	
+				tmp = (uint)sensor_data.temp_h<<8|(uint)sensor_data.temp_l;
+				SendTemp(tmp);
+		}
 		delay1s();
 		DS3231_Init();
-//		SendString("temp:\r\n");							//调试信息时候用
-//		LCD_DI = 0;
-//		LCD_RW = 0;
-//		LCD_EN = 0;		
 		LED1 = 0;
 		ALARM = 0;
 		START = 0;
 		STOP = 0;
 		delay1s();
-//		LCD_DI = 1;
-//		LCD_RW = 1;
-//		LCD_EN = 1;
 		ALARM = 1;
 		START = 1;
 		STOP = 1;
 		LED1 = 1;
-//		debug();
 	}
 }
 
+void SendTemp(uint temp)
+{		
+		SendByteNum(temp/10000);			// 百位显示值
+		SendByteNum(temp/1000%10);			// 十位显示值
+		SendByteNum(temp/100%10);			// 个位显示值
+		SendOneByte('.');
+		SendByteNum(temp/10%10);			//十分位显示值
+		SendByteNum(temp%10);				//百分位显示值
+}
 
 
 void EXTI0_ISR() interrupt 0 
