@@ -30,8 +30,7 @@
 *.dSYM/
 
 #My config
-AotoPump_slaver
-AutoPumpV2_slaver
+AutoPumpV2_master
 *.uvgui.DammStangerTS
 *.uvgui.Xiaodeng
 #*.uvopt
