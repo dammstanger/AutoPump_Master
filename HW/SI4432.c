@@ -347,17 +347,17 @@ void SI4432_ISR(void)
 {
 	uchar i,Length_revdat;
 	i = SI4432_ReadReg(0x07);					//读取设备模式
-	SendString("mode in ISR:\r\n");
-	SendByteASCII(i);
-	SendString("\r\n");
+//	SendString("mode in ISR:\r\n");
+//	SendByteASCII(i);
+//	SendString("\r\n");
 
 	//读标志位，清零
 	ItStatus1 = SI4432_ReadReg(0x03);			//读取中断标志寄存器1	
 	ItStatus2 = SI4432_ReadReg(0x04);			//读取中断标志寄存器2	
-	SendString("Interrupt occued\r\n");
-	SendByteASCII(ItStatus1);
-	SendByteASCII(ItStatus2);
-	SendString("\r\n");
+//	SendString("Interrupt occued\r\n");
+//	SendByteASCII(ItStatus1);
+//	SendByteASCII(ItStatus2);
+//	SendString("\r\n");
 	if(ItStatus1&0x02)							//接收到有效数据
 	{
 		SendString(" rev Interrupt\r\n");

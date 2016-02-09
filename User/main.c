@@ -103,19 +103,22 @@ void main()
 				SendByteASCII(sensor_data.press_h);
 				SendByteASCII(sensor_data.press_l);
 				SendString("\r\n");	
+				SendString("POS data:\r\n");			
+				SendByteASCII(sensor_data.possw);
+				SendString("\r\n");				
 				tmp = (uint)sensor_data.temp_h<<8|(uint)sensor_data.temp_l;
 				SendTemp(tmp);
 		}
 		delay1s();
 		DS3231_Init();
 		LED1 = 0;
-		ALARM = 0;
-		START = 0;
-		STOP = 0;
+//		ALARM = 0;
+//		START = 0;
+//		STOP = 0;
 		delay1s();
-		ALARM = 1;
-		START = 1;
-		STOP = 1;
+//		ALARM = 1;
+//		START = 1;
+//		STOP = 1;
 		LED1 = 1;
 	}
 }
