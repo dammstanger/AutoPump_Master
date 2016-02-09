@@ -45,7 +45,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>..\Output\</OutputDirectory>
-          <OutputName>AutoPumpV2_slaver</OutputName>
+          <OutputName>AutoPumpV2_master</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -335,7 +335,7 @@
             <DataOverlaying>1</DataOverlaying>
             <OverlayString></OverlayString>
             <MiscControls></MiscControls>
-            <DisableWarningNumbers></DisableWarningNumbers>
+            <DisableWarningNumbers>16</DisableWarningNumbers>
             <LinkerCmdFile></LinkerCmdFile>
             <Assign></Assign>
             <ReserveString></ReserveString>
@@ -369,14 +369,14 @@
               <FilePath>..\HW\SI4432.c</FilePath>
             </File>
             <File>
-              <FileName>DS18B20.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\HW\DS18B20.c</FilePath>
-            </File>
-            <File>
               <FileName>DS3231.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HW\DS3231.c</FilePath>
+            </File>
+            <File>
+              <FileName>YXD19264D_51.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HW\YXD19264D_51.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -392,11 +392,6 @@
               <FileName>UART_51.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\UART_51.c</FilePath>
-            </File>
-            <File>
-              <FileName>ADC_51.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\BSP\ADC_51.c</FilePath>
             </File>
             <File>
               <FileName>IIC_soft_51.c</FileName>
@@ -417,6 +412,11 @@
               <FileName>Sensor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\APP\Sensor.c</FilePath>
+            </File>
+            <File>
+              <FileName>LCD_GUI.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\LCD_GUI.c</FilePath>
             </File>
           </Files>
         </Group>

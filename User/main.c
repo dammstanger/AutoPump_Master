@@ -22,10 +22,10 @@
 #include "UART_51.h"
 #include "SI4432.h"
 #include "Transmit.h"
-#include "DS18B20.h"
-#include "ADC_51.h"
 #include "DS3231.h"
 #include "IIC_soft_51.h"
+#include "YXD19264D_51.h"
+#include "LCD_GUI.h"
 /****************************宏定义***********************************************/
 #define P2_5	0x20
 #define P2_7	0x80
@@ -36,9 +36,17 @@
 sbit START 	= P2^7;
 sbit STOP	= P2^5;
 sbit ALARM	= P4^0;
+
+sbit TMP	= P4^4;
+
 char temp;
 char dat[] = "abc";
 /****************************函数声明*********************************************/
+void SendTemp(uint temp);
+
+
+
+
 
 void delay200ms(void)   //误差 -0.000000000028us
 {
@@ -62,71 +70,68 @@ void EXTI0_Init()
     EX0 = 1;                        //enable INT0 interrupt
 }
 
-void JiDianQ_Init()
-{;
-	P2M0 = 0;//P2_5|P2_7;				//P2.1 P2.2强推挽
-	P2M1 = 0;
-}
-
-
 
 void main()
 {
+	uint tmp=0;
 	delay1s();
 	AUXR = AUXR|0x40;  	// T1, 1T Mode
 
 //	IE2 |= ESPI;
 	EXTI0_Init();                         
 	UART_Init();
-//	JiDianQ_Init();
 	SPI_Init(MASTER);
 	IIC_GPIO_Config();
+	LCD_GPIOInit();
+	LCD_Init();
 	delay1s();
 	DS3231_Init();
 	SI4432_Init();
 	SI4432_SetRxMode();	//接收模式
-//	ADC_Init();
-//	delay1s();
-//	SendString("ROMID Search...\r\n");
-//	SendROMID(DS18B20_SearchRomID());
-//	SendString("\r\n");					//调试信息时候用
 	//-----------------------------------------------------
 	EA = 1;								//注意：外设初始化完再开中断！
-
+	GUI_HomePage();
 	while(1)
 	{	
-		
-//		ADC_STARTCOV(ADC_CH0,ADC_SPEED_540T);
-//		delay200ms();
-//		delay200ms();
-//		DATA_Cmd_ACK();
-//		if(Trans_RevPakFin)
-//		{
-//			Trans_RevPakFin = 0;
-//			if(1==Pak_Handle())
-//				SendString("valid data received.\r\n");					//调试信息时候用
-//		}
+		DATA_Cmd_Pkg_Send();
+		if(Trans_RevPakFin)
+		{
+			Trans_RevPakFin = 0;
+			if(2==Pak_Handle())
+				SendString("valid data received.\r\n");		//调试信息时候用
+				SendString("ADC data:\r\n");			
+				SendByteASCII(sensor_data.press_h);
+				SendByteASCII(sensor_data.press_l);
+				SendString("\r\n");	
+				SendString("POS data:\r\n");			
+				SendByteASCII(sensor_data.possw);
+				SendString("\r\n");				
+				tmp = (uint)sensor_data.temp_h<<8|(uint)sensor_data.temp_l;
+				SendTemp(tmp);
+		}
 		delay1s();
 		DS3231_Init();
-//		SendString("temp:\r\n");									//调试信息时候用
-//		SendTemp(DS18B20_ReadTemperature(1));
-//		SendString("\r\n");											//调试信息时候用
-//		SendString("temp::\r\n");									//调试信息时候用
-//		SendTemp(DS18B20_ReadTemperature(2));
-//		SendString("\r\n");											//调试信息时候用
 		LED1 = 0;
-		ALARM = 0;
-		START = 0;
-		STOP = 0;
+//		ALARM = 0;
+//		START = 0;
+//		STOP = 0;
 		delay1s();
-		ALARM = 1;
-		START = 1;
-		STOP = 1;
+//		ALARM = 1;
+//		START = 1;
+//		STOP = 1;
 		LED1 = 1;
-//		debug();
 	}
 }
 
+void SendTemp(uint temp)
+{		
+		SendByteNum(temp/10000);			// 百位显示值
+		SendByteNum(temp/1000%10);			// 十位显示值
+		SendByteNum(temp/100%10);			// 个位显示值
+		SendOneByte('.');
+		SendByteNum(temp/10%10);			//十分位显示值
+		SendByteNum(temp%10);				//百分位显示值
+}
 
 
 void EXTI0_ISR() interrupt 0 
