@@ -26,6 +26,15 @@
 #define uchar	unsigned char 
 #define uint	unsigned int
 
+#define MANAUL		0x00
+#define AUTO		0x01
+//----------------------
+#define STATUS		0x0e
+#define FREE		0x00
+#define WORK_SELF	0x02
+#define WORK_OUT	0x04
+#define SWOFF		0x06
+
 /****************************类型定义***********************************************/
 typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 typedef struct{
@@ -36,11 +45,15 @@ typedef struct{
 	uchar flow;
 	uchar possw;
 }PAG_DATA;
-/****************************变量声明*********************************************/
 
+/****************************变量定义*********************************************/
 sbit LED1 = P2^6;
 sbit LED2 = P5^1;
 
+		
+
+/****************************变量声明*********************************************/
 extern PAG_DATA sensor_data;
+extern char g_sysflag;
 #endif
 /******************* (C) COPYRIGHT 2015 DammStanger *****END OF FILE************/

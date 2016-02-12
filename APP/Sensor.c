@@ -22,6 +22,9 @@
 #include "UART_51.h"
 #include "Transmit.h"
 #include "Sensor.h"
+#include "LCD_GUI.h"
+#include "YXD19264D_51.h"
+
 /****************************宏定义***********************************************/
 
 /****************************变量定义*********************************************/
@@ -35,7 +38,15 @@ PAG_DATA sensor_data={'a','a','b','b','c','c',};
  * 返回  ：-
  * 调用  ：-
  ********************************************************************************/
+void TemperDatHandle()
+{
+	uint tmp;
+	tmp = (uint)sensor_data.temp_h<<8|(uint)sensor_data.temp_l;
+	if(tmp>5000) tmp = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
+	//显示温度
+	LCD_Dis_Digital_float(2,22,tmp);
 
+}
 
 /********************************************************************************
  * 函数名：PressDatHandle()
@@ -44,14 +55,23 @@ PAG_DATA sensor_data={'a','a','b','b','c','c',};
  * 返回  ：-
  * 调用  ：-
  ********************************************************************************/
-void PressDatHandle(uchar dat_h,uchar dat_l)
+void PressDatHandle()
 {
-	sensor_data.press_h = dat_h;
-	sensor_data.press_l = dat_l;	
-	SendString("ADC data:\r\n");			
-	SendByteASCII(sensor_data.press_h);
-	SendByteASCII(sensor_data.press_l);
-	SendString("\r\n");	
+	uint press = (uint)sensor_data.press_h<<8|(uint)sensor_data.press_l;
+	uint max=0,min=0;
+	
+	press = press*100/(max-min);
+	
+	if(FREE==(g_sysflag&STATUS)) GUI_CaseData_Dis(press,1);
+	else GUI_CaseData_Dis(press,0);
+	
+//	SendString("ADC data:\r\n");			
+//	SendByteASCII(sensor_data.press_h);
+//	SendByteASCII(sensor_data.press_l);
+//	SendString("\r\n");	
+//	SendString("POS data:\r\n");			
+//	SendByteASCII(sensor_data.possw);
+//	SendString("\r\n");
 }	
 
 

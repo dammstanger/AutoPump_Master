@@ -57,50 +57,95 @@ void LCD_FlashArrows(bool enable)
 void GUI_HomePage()
 {
 	LCD_Dis_Pict(1,1,45,62,Pic_Case);
-	LCD_Dis_Char_16_16(1,5,&WordLib_CN[4][0],FALSE);		//水位自动控制系统
-	LCD_Dis_Char_16_16(1,6,&WordLib_CN[5][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,7,&WordLib_CN[13][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,8,&WordLib_CN[14][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,9,&WordLib_CN[15][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,10,&WordLib_CN[16][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,11,&WordLib_CN[17][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,12,&WordLib_CN[18][0],FALSE);		//
 	
-	LCD_Dis_Char_16_16(2,5,&WordLib_CN[0][0],FALSE);		//实时温度
-	LCD_Dis_Char_16_16(2,6,&WordLib_CN[1][0],FALSE);		//
-	LCD_Dis_Char_16_16(2,7,&WordLib_CN[2][0],FALSE);		//
-	LCD_Dis_Char_16_16(2,8,&WordLib_CN[3][0],FALSE);		//	
-	LCD_Dis_ASCIIStr(2,17,":",FALSE);
-	LCD_Dis_Digital_float(2,22,3225);
-	LCD_Dis_Char_8_16(2,23,&CharLib_SplLabel[0][0],FALSE);
-	LCD_Dis_ASCIIStr(2,24,"C",FALSE);
+	LCD_Dis_Char_16_16(1,5,&WordLib_CN[0][0],FALSE);		//实时水温
+	LCD_Dis_Char_16_16(1,6,&WordLib_CN[1][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,7,&WordLib_CN[4][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,8,&WordLib_CN[2][0],FALSE);		//	
+	LCD_Dis_ASCIIStr(1,17,":",FALSE);
+	LCD_Dis_Digital_float(1,22,8888);
+	LCD_Dis_Char_8_16(1,23,&CharLib_SplLabel[0][0],FALSE);
+	LCD_Dis_ASCIIStr(1,24,"C",FALSE);
 	
-	LCD_Dis_Char_16_16(3,5,&WordLib_CN[19][0],FALSE);		//状态
-	LCD_Dis_Char_16_16(3,6,&WordLib_CN[20][0],FALSE);
-	LCD_Dis_ASCIIStr(3,17,":",FALSE);
-	LCD_Dis_Char_16_16(3,10,&WordLib_CN[21][0],FALSE);		//空闲
-	LCD_Dis_Char_16_16(3,11,&WordLib_CN[22][0],FALSE);
+	LCD_Dis_Char_16_16(2,5,&WordLib_CN[19][0],FALSE);		//状态
+	LCD_Dis_Char_16_16(2,6,&WordLib_CN[20][0],FALSE);
+	LCD_Dis_ASCIIStr(2,13,":",FALSE);
+	LCD_Dis_Char_16_16(2,10,&WordLib_CN[21][0],FALSE);		//空闲
+	LCD_Dis_Char_16_16(2,11,&WordLib_CN[22][0],FALSE);	
 	
-	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],TRUE);		//历史
-	LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],TRUE);		//
+	LCD_Dis_Char_16_16(3,5,&WordLib_CN[34][0],FALSE);		//模式
+	LCD_Dis_Char_16_16(3,6,&WordLib_CN[35][0],FALSE);
+	LCD_Dis_ASCIIStr(3,13,":",FALSE);
+	LCD_Dis_Char_16_16(3,10,&WordLib_CN[13][0],FALSE);		//自动
+	LCD_Dis_Char_16_16(3,11,&WordLib_CN[14][0],FALSE);	
 	
-	LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],TRUE);		//设置
-	LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],TRUE);		//
+	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
+	LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
 	
-	LCD_Dis_ASCIIStr(4,18,"HOME",TRUE);		//HOME
+	LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],FALSE);		//设置
+	LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],FALSE);		
 	
-	GUI_CaseData_Dis(50);
+	LCD_Dis_ASCIIStr(4,19,"HOME",TRUE);						//HOME
 }
 
 
 /********************************************************************************
- * 函数名：LCD_FlashArrows()
- * 描述  ：箭头闪烁
- * 输入  ：-		    	
+ * 函数名：GUI_HomePage2()
+ * 描述  ：显示主界面日历时间，室温
+ * 输入  ：-
  * 返回  ：- 
  * 调用  ：外部调用
  ********************************************************************************/
-void GUI_CaseData_Dis(char percent)
+void GUI_HomePage2()
+{
+
+	LCD_Dis_Char_16_16(1,3,&WordLib_CN[4][0],FALSE);		//水位自动控制系统
+	LCD_Dis_Char_16_16(1,4,&WordLib_CN[5][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,5,&WordLib_CN[13][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,6,&WordLib_CN[14][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,7,&WordLib_CN[15][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,8,&WordLib_CN[16][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,9,&WordLib_CN[17][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,10,&WordLib_CN[18][0],FALSE);		//
+	
+//	LCD_Dis_Char_16_16(2,1,&WordLib_CN[32][0],FALSE);		//今天:
+//	LCD_Dis_Char_16_16(2,2,&WordLib_CN[33][0],FALSE);		
+//	LCD_Dis_ASCIIStr(2,5,":",FALSE);
+	LCD_Dis_Digital_int(2,10,2016);
+	LCD_Dis_Char_16_16(2,6,&WordLib_CN[10][0],FALSE);		//年月日
+	LCD_Dis_Digital_int(2,14,1);
+	LCD_Dis_Char_16_16(2,8,&WordLib_CN[11][0],FALSE);		
+	LCD_Dis_Digital_int(2,18,1);
+	LCD_Dis_Char_16_16(2,10,&WordLib_CN[12][0],FALSE);
+	LCD_Dis_Digital_int(3,6,23);							//时分秒
+	LCD_Dis_ASCIIStr(3,7,":",FALSE);
+	LCD_Dis_Digital_int(3,9,59);
+	LCD_Dis_ASCIIStr(3,10,":",FALSE);
+	LCD_Dis_Digital_int(3,12,59);
+	
+	LCD_Dis_Char_16_16(3,8,&WordLib_CN[37][0],FALSE);		
+	LCD_Dis_Char_16_16(3,9,&WordLib_CN[38][0],FALSE);
+	LCD_Dis_Char_16_16(3,10,&WordLib_CN[44][0],FALSE);		
+
+	
+	
+//	LCD_Dis_Char_16_16(4,1,&WordLib_CN[31][0],FALSE);		//气温
+//	LCD_Dis_Char_16_16(4,2,&WordLib_CN[2][0],FALSE);		//	
+//	LCD_Dis_ASCIIStr(4,5,":",FALSE);
+	LCD_Dis_Digital_float(4,14,8888);						//从右往左的顺序增长
+	LCD_Dis_Char_8_16(4,15,&CharLib_SplLabel[0][0],FALSE);
+	LCD_Dis_ASCIIStr(4,16,"C",FALSE);
+}
+
+
+/********************************************************************************
+ * 函数名：GUI_CaseData_Dis()
+ * 描述  ：水池数据显示
+ * 输入  ：-		    	refill=1 用于界面切换时重新绘制水位
+ * 返回  ：- 
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_CaseData_Dis(char percent,char refill)
 {
 	char filevel;
 	static signed char filevel_smooth=0,filevel_last = 0;
@@ -109,6 +154,9 @@ void GUI_CaseData_Dis(char percent)
 	uchar i;
 	
 	filevel = (signed char)(percent/2.44+1);
+	
+	if(refill)	filevel_last = 0;						//需要重新填充，将历史液位置零
+	
 	filevel_smooth = filevel - filevel_last;
 	if(filevel_smooth<0)
 	{
@@ -123,32 +171,32 @@ void GUI_CaseData_Dis(char percent)
 		switch(filevel_last)
 		{
 			case 1 : 
-			{	if(fallflag)							//往下降
-					LCD_Clear_Region(42,5,1,43);		//清理上一条水平线
+			{	if(fallflag)										//往下降
+					LCD_Clear_Region(42,5,1,43);					//清理上一条水平线
 				else
 				{
 					LCD_fill_Region(43,6,1,41);
 				}
 			}break;
 			case 2 : 
-			{	if(fallflag)							//往下降
-					LCD_Clear_Region(41,4,1,45);		//清理上一条水平线
+			{	if(fallflag)										//往下降
+					LCD_Clear_Region(41,4,1,45);					//清理上一条水平线
 				else
 				{
 					LCD_fill_Region(42,5,1,43);
 				}
 			}break;			
 			case 3 : 
-			{	if(fallflag)							//往下降
-					LCD_Clear_Region(40,4,1,45);		//清理上一条水平线
+			{	if(fallflag)										//往下降
+					LCD_Clear_Region(40,4,1,45);					//清理上一条水平线
 				else
 				{
 					LCD_fill_Region(41,4,1,45);
 				}
 			}break;
 			case 4 :
-			{	if(fallflag)							//往下降
-					LCD_Clear_Region(39,3,1,47);		//清理上一条水平线
+			{	if(fallflag)										//往下降
+					LCD_Clear_Region(39,3,1,47);					//清理上一条水平线
 				else
 				{
 					LCD_fill_Region(40,4,1,45);
@@ -171,8 +219,8 @@ void GUI_CaseData_Dis(char percent)
 				}
 			}break;
 			case 40 :
-			{	if(fallflag)							//往下降
-					LCD_Clear_Region(3,6,1,41);		//清理上一条水平线
+			{	if(fallflag)										//往下降
+					LCD_Clear_Region(3,6,1,41);						//清理上一条水平线
 				else
 				{
 					LCD_fill_Region(4,5,1,43);
@@ -184,7 +232,7 @@ void GUI_CaseData_Dis(char percent)
 			}break;	
 			default :
 			{	
-				if(fallflag)							//往下降
+				if(fallflag)										//往下降
 					LCD_Clear_Region(43-filevel_last,3,1,47);		//清理上一条水平线
 				else
 				{
@@ -195,7 +243,7 @@ void GUI_CaseData_Dis(char percent)
 	}
 	LCD_Dis_Digital_int(2,4,percent);
 	LCD_Dis_ASCIIStr(2,5,"%",FALSE);
-	if(percent==99&&percent - percent_last<0)
+	if(percent==99&&percent - percent_last<0)	//从100%到99%，前面一位被水填充
 	{
 		LCD_fill_Region(17,9,16,8);
 	}

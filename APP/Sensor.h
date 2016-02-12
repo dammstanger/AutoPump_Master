@@ -22,7 +22,8 @@
 
 #include "globaldefine.h"
 
-void PressDatHandle(uchar dat_h,uchar dat_l);
+void TemperDatHandle(void);
+void PressDatHandle(void);
 
 #endif
 

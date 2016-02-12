@@ -9,7 +9,7 @@
  * 从属关系	：PoolAuto
  * 库版本	：无
  * 创建时间	：2015.7.11
- * 最后编辑	：2016.1.26
+ * 最后编辑	：2016.2.12
  **-------------------------------------------------------------------------------
 
  * 作	者	：Damm Stanger
@@ -26,6 +26,7 @@
 #include "IIC_soft_51.h"
 #include "YXD19264D_51.h"
 #include "LCD_GUI.h"
+#include "Sensor.h"
 /****************************宏定义***********************************************/
 #define P2_5	0x20
 #define P2_7	0x80
@@ -33,11 +34,17 @@
 /****************************变量声明*********************************************/
 
 /****************************变量定义*********************************************/
+//系统标志位
+//                    		7		6		5		4		3		2		1		0		Reset Value
+char g_sysflag = 0;		//	保留	保留	保留	保留	|		状态	|		模式	0000 0000
+bit g_timeoverflg=0;
+//---------------------------------------------
 sbit START 	= P2^7;
 sbit STOP	= P2^5;
 sbit ALARM	= P4^0;
-
 sbit TMP	= P4^4;
+sbit CAPWAI	= P1^3;
+sbit CAPNEI	= P1^4;
 
 char temp;
 char dat[] = "abc";
@@ -73,7 +80,6 @@ void EXTI0_Init()
 
 void main()
 {
-	uint tmp=0;
 	delay1s();
 	AUXR = AUXR|0x40;  	// T1, 1T Mode
 
@@ -90,39 +96,65 @@ void main()
 	SI4432_SetRxMode();	//接收模式
 	//-----------------------------------------------------
 	EA = 1;								//注意：外设初始化完再开中断！
-	GUI_HomePage();
 	while(1)
 	{	
+		//按键扫描----------------------------------------------
 		
-		DATA_Cmd_Pkg_Send();
-		if(Trans_RevPakFin)
+		//确定系统状态------------------------------------------
+		g_sysflag &= ~STATUS; 
+		if(CAPWAI==1)
+			g_sysflag |= FREE;						//空闲
+		else if(CAPNEI==1&&g_timeoverflg==0)		//自家抽水
+			g_sysflag |= WORK_SELF;
+		else if(CAPNEI==1&&g_timeoverflg==1)		//水通在别家
+			g_sysflag |= SWOFF;
+		else if(CAPNEI==0)							//别家抽水
+			g_sysflag |= WORK_OUT;
+		
+		//-----------------------------------------------	
+		switch(g_sysflag&STATUS)
 		{
-			Trans_RevPakFin = 0;
-			if(2==Pak_Handle())
-			{
-				SendString("valid data received.\r\n");		//调试信息时候用
-				SendString("ADC data:\r\n");			
-				SendByteASCII(sensor_data.press_h);
-				SendByteASCII(sensor_data.press_l);
-				SendString("\r\n");	
-				SendString("POS data:\r\n");			
-				SendByteASCII(sensor_data.possw);
-				SendString("\r\n");				
-				tmp = (uint)sensor_data.temp_h<<8|(uint)sensor_data.temp_l;
-				SendTemp(tmp);
-			}
-		}
-		
-		DS3231_Init();
-		LED1 = 0;
-//		ALARM = 0;
-//		START = 0;
-//		STOP = 0;
-		delay1s();
-//		ALARM = 1;
-//		START = 1;
-//		STOP = 1;
-		LED1 = 1;
+			case FREE :{
+				GUI_HomePage();
+				while(1)
+				{
+					//发送采集数据指令
+//					DATA_Cmd_Pkg_Send();
+					if(Trans_RevPakFin)
+					{
+						Trans_RevPakFin = 0;
+						if(2==Pak_Handle())
+						{
+							SendString("valid data received.\r\n");		//调试信息时候用
+							PressDatHandle();				
+							TemperDatHandle();
+						}
+					}
+					LCD_Clear();		//清屏
+
+					DS3231_Init();
+					LED1 = 0;
+					delay1s();
+					delay1s();
+					delay1s();
+					LCD_Clear();		//清屏
+					GUI_HomePage2();
+					LED1 = 1;
+					delay1s();
+					delay1s();
+					delay1s();
+				}//end of while
+			}break;
+			case WORK_SELF :{
+				
+			}break;
+			case WORK_OUT :{
+				
+			}break;
+			case SWOFF :{
+				
+			}break;		}
+
 	}
 }
 

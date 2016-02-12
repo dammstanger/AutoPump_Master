@@ -31,10 +31,9 @@ extern uchar code Pic_xuejie[];
 
 /****************************º¯ÊýÉùÃ÷*********************************************/
 void LCD_FlashArrows(bool enable);
-void GUI_CaseData_Dis(char percent);
+void GUI_CaseData_Dis(char percent,char refill);
 void GUI_HomePage(void);
-
-
+void GUI_HomePage2(void);
 #endif
 
 /******************** (C) COPYRIGHT 2015 DammStanger *****************************************/
