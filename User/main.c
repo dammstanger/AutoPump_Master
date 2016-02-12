@@ -93,11 +93,13 @@ void main()
 	GUI_HomePage();
 	while(1)
 	{	
+		
 		DATA_Cmd_Pkg_Send();
 		if(Trans_RevPakFin)
 		{
 			Trans_RevPakFin = 0;
 			if(2==Pak_Handle())
+			{
 				SendString("valid data received.\r\n");		//调试信息时候用
 				SendString("ADC data:\r\n");			
 				SendByteASCII(sensor_data.press_h);
@@ -108,8 +110,9 @@ void main()
 				SendString("\r\n");				
 				tmp = (uint)sensor_data.temp_h<<8|(uint)sensor_data.temp_l;
 				SendTemp(tmp);
+			}
 		}
-		delay1s();
+		
 		DS3231_Init();
 		LED1 = 0;
 //		ALARM = 0;
@@ -137,7 +140,7 @@ void SendTemp(uint temp)
 void EXTI0_ISR() interrupt 0 
 {	//响应后IE0自动清除
 	SI4432_ISR();
-	SendString("ISR completed.\r\n");					//调试信息时候用	
+//	SendString("ISR completed.\r\n");					//调试信息时候用	
 }
 
 /******************* (C) COPYRIGHT 2016 DammStanger *****END OF FILE************/

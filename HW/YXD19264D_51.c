@@ -119,7 +119,7 @@ void LCD_BUSYCHECK(uchar unit)
 {
 	uchar retval;
 	do{
-		SendString("busy check...\r\n");	
+//		SendString("busy check...\r\n");	
 		retval=0;									//在多次循环中需要重新赋值
 		if(unit&LCD_U1)
 			retval|=LCD_Read(LCD_U1,LCD_Write_Con_Cmd);
@@ -127,7 +127,6 @@ void LCD_BUSYCHECK(uchar unit)
 			retval|=LCD_Read(LCD_U2,LCD_Write_Con_Cmd);
 		if(unit&LCD_U3)
 			retval|=LCD_Read(LCD_U3,LCD_Write_Con_Cmd);
-		LCD_Delay(30);
 	}while(retval&0x80);
 }
 /****************************************************************************
