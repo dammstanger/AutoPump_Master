@@ -119,19 +119,17 @@ void main()
 				while(1)
 				{
 					//发送采集数据指令
-//					DATA_Cmd_Pkg_Send();
+					DATA_Cmd_Pkg_Send();
 					if(Trans_RevPakFin)
 					{
 						Trans_RevPakFin = 0;
 						if(2==Pak_Handle())
 						{
-							SendString("valid data received.\r\n");		//调试信息时候用
+							SendString("valid data received.\r\n");		
 							PressDatHandle();				
 							TemperDatHandle();
 						}
 					}
-					LCD_Clear();		//清屏
-
 					DS3231_Init();
 					LED1 = 0;
 					delay1s();

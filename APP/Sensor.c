@@ -40,11 +40,19 @@ PAG_DATA sensor_data={'a','a','b','b','c','c',};
  ********************************************************************************/
 void TemperDatHandle()
 {
-	uint tmp;
-	tmp = (uint)sensor_data.temp_h<<8|(uint)sensor_data.temp_l;
-	if(tmp>5000) tmp = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
+	uint tmp1,tmp2;
+	tmp1 = (uint)sensor_data.temp1_h<<8|(uint)sensor_data.temp1_l;
+	SendString("temp1:\r\n");
+	SendByteASCII(sensor_data.temp1_h);
+	SendString("\r\n");
+	tmp2 = (uint)sensor_data.temp2_h<<8|(uint)sensor_data.temp2_l;
+	SendString("temp1:\r\n");
+	SendByteASCII(tmp2);
+	SendString("\r\n");
+	if(tmp1>5000) tmp1 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
 	//显示温度
-	LCD_Dis_Digital_float(2,22,tmp);
+	LCD_Dis_Digital_float(2,22,tmp1);
+	LCD_Dis_Digital_float(3,22,tmp2);
 
 }
 
@@ -62,13 +70,13 @@ void PressDatHandle()
 	
 	press = press*100/(max-min);
 	
-	if(FREE==(g_sysflag&STATUS)) GUI_CaseData_Dis(press,1);
-	else GUI_CaseData_Dis(press,0);
+//	if(FREE==(g_sysflag&STATUS)) GUI_CaseData_Dis(press,1);
+//	else GUI_CaseData_Dis(press,0);
 	
-//	SendString("ADC data:\r\n");			
-//	SendByteASCII(sensor_data.press_h);
-//	SendByteASCII(sensor_data.press_l);
-//	SendString("\r\n");	
+	SendString("ADC data:\r\n");			
+	SendByteASCII(sensor_data.press_h);
+	SendByteASCII(sensor_data.press_l);
+	SendString("\r\n");	
 //	SendString("POS data:\r\n");			
 //	SendByteASCII(sensor_data.possw);
 //	SendString("\r\n");

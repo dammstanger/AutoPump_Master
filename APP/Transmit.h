@@ -3,13 +3,13 @@
  * 文件名	：Transmit.h
  * 描	述	：RTU通信协议,从机端
  *            
- * 实验平台	：自控水泵V2.0
+ * 实验平台	：自控水泵V1.0  60S2 11.0592MHz
  * 硬件连接	：
  * 版 	本	：V0.1.160124
  * 从属关系	：PoolAuto
  * 库版本	：无
  * 创建时间	：2016.1.24
- * 最后编辑	：2016.1.25
+ * 最后编辑	：2016.2.14
  **-------------------------------------------------------------------------------
 
  * 作	者	：Damm Stanger
@@ -24,16 +24,19 @@
 #include "UART_51.h"
 #include "globaldefine.h"
 /****************************类型定义*********************************************/
-//typedef struct{
-//	uchar temp_h;
-//	uchar temp_l;
-//	uchar press_h;
-//	uchar press_l;
-//	uchar flow;
-//	uchar possw;
-//}PAG_DATA;						//已放入glogaldefiine.h
-extern PAG_DATA *pag_data;
+typedef struct{
+	uchar temp1_h;
+	uchar temp1_l;
+	uchar temp2_h;
+	uchar temp2_l;
+	uchar press_h;
+	uchar press_l;
+	uchar flow;
+	uchar possw;
+}PAG_DATA;
 
+extern PAG_DATA *pag_data;
+extern PAG_DATA sensor_data;
 /****************************变量声明*********************************************/
 
 /****************************宏定义***********************************************/
@@ -104,12 +107,14 @@ extern PAG_DATA *pag_data;
 
 
 //----------数据偏移地址----------------
-#define PAG_TEMP_ADDR_H			0X04
-#define PAG_TEMP_ADDR_L			0x05
-#define PAG_PRESS_ADDR_H		0X06
-#define PAG_PRESS_ADDR_L		0x07
-#define PAG_FLOW_ADDR			0X08
-#define PAG_POSSW_ADDR			0x09
+#define PAG_TEMP1_ADDR_H			0X04
+#define PAG_TEMP1_ADDR_L			0x05
+#define PAG_TEMP2_ADDR_H			0X06
+#define PAG_TEMP2_ADDR_L			0x07
+#define PAG_PRESS_ADDR_H			0X08
+#define PAG_PRESS_ADDR_L			0x09
+#define PAG_FLOW_ADDR				0X0a
+#define PAG_POSSW_ADDR				0x0b
 
 #define Is_DATA_Cmd_Pkg()		((*(Revbuf+PAG_CMD_ADDR_H)==PAG_DATA_CMD_H) && (*(Revbuf+PAG_CMD_ADDR_L)==PAG_DATA_CMD_L))		
 #define Is_DATA_Ack_Pkg()		((*(Revbuf+PAG_CMD_ADDR_H)==PAG_DATA_ACK_H) && (*(Revbuf+PAG_CMD_ADDR_L)==PAG_DATA_ACK_L))		
@@ -122,26 +127,19 @@ extern PAG_DATA *pag_data;
 }
 
 #define DATA_Cmd_Handle()										\
-{																\							
-	pag_data->temp_h 	= *(Revbuf+PAG_TEMP_ADDR_H);			\
-	pag_data->temp_l 	= *(Revbuf+PAG_TEMP_ADDR_L);			\
+{																\
+	pag_data->temp1_h 	= *(Revbuf+PAG_TEMP1_ADDR_H);			\
+	pag_data->temp1_l 	= *(Revbuf+PAG_TEMP1_ADDR_L);			\
+	pag_data->temp2_h 	= *(Revbuf+PAG_TEMP2_ADDR_H);			\
+	pag_data->temp2_l 	= *(Revbuf+PAG_TEMP2_ADDR_L);			\
 	pag_data->press_h	= *(Revbuf+PAG_PRESS_ADDR_H);			\
 	pag_data->press_l	= *(Revbuf+PAG_PRESS_ADDR_L);			\
 	pag_data->flow 		= *(Revbuf+PAG_FLOW_ADDR);				\
 	pag_data->possw 	= *(Revbuf+PAG_POSSW_ADDR);				\
 }
 
-#define DATA_Cmd_ACK()									\
-{														\
-	*(Sendbuf+PAG_CMD_ADDR_H) = 	PAG_DATA_ACK_H;	\
-	*(Sendbuf+PAG_CMD_ADDR_L) = 	PAG_DATA_ACK_L;	\
-	*(Sendbuf+PAG_TEMP_ADDR_H) = 	pag_data->temp_h;			\
-	*(Sendbuf+PAG_TEMP_ADDR_L) = 	pag_data->temp_l;			\
-	*(Sendbuf+PAG_PRESS_ADDR_H) = 	pag_data->press_h;			\
-	*(Sendbuf+PAG_PRESS_ADDR_L) = 	pag_data->press_l;			\
-	*(Sendbuf+PAG_FLOW_ADDR) = 		pag_data->flow;				\
-	*(Sendbuf+PAG_POSSW_ADDR) = 	pag_data->possw;			\
-	TransPkgSend();													\
+#define DATA_Cmd_ACK()											\
+{																\
 }
 
 /****************************结构体定义*******************************************/

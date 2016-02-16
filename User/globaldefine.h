@@ -37,23 +37,12 @@
 
 /****************************类型定义***********************************************/
 typedef enum {FALSE = 0, TRUE = !FALSE} bool;
-typedef struct{
-	uchar temp_h;
-	uchar temp_l;
-	uchar press_h;
-	uchar press_l;
-	uchar flow;
-	uchar possw;
-}PAG_DATA;
 
 /****************************变量定义*********************************************/
 sbit LED1 = P2^6;
 sbit LED2 = P5^1;
 
-		
-
 /****************************变量声明*********************************************/
-extern PAG_DATA sensor_data;
 extern char g_sysflag;
 #endif
 /******************* (C) COPYRIGHT 2015 DammStanger *****END OF FILE************/
