@@ -29,7 +29,7 @@
 
 /****************************变量定义*********************************************/
 PAG_DATA sensor_data={'a','a','b','b','c','c',};
-
+TMPDAT	tmp_data={8888,8888};
 
 /********************************************************************************
  * 函数名：TemperDatHandle()
@@ -40,19 +40,16 @@ PAG_DATA sensor_data={'a','a','b','b','c','c',};
  ********************************************************************************/
 void TemperDatHandle()
 {
-	uint tmp1,tmp2;
-	tmp1 = (uint)sensor_data.temp1_h<<8|(uint)sensor_data.temp1_l;
-	SendString("temp1:\r\n");
-	SendByteASCII(sensor_data.temp1_h);
-	SendString("\r\n");
-	tmp2 = (uint)sensor_data.temp2_h<<8|(uint)sensor_data.temp2_l;
-	SendString("temp1:\r\n");
-	SendByteASCII(tmp2);
-	SendString("\r\n");
-	if(tmp1>5000) tmp1 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
-	//显示温度
-	LCD_Dis_Digital_float(2,22,tmp1);
-	LCD_Dis_Digital_float(3,22,tmp2);
+	tmp_data.tmp1 = (uint)sensor_data.temp1_h<<8|(uint)sensor_data.temp1_l;
+//	SendString("temp1:\r\n");
+//	SendByteASCII(tmp_data.tmp1);
+//	SendString("\r\n");
+	tmp_data.tmp2 = (uint)sensor_data.temp2_h<<8|(uint)sensor_data.temp2_l;
+//	SendString("temp2:\r\n");
+//	SendByteASCII(tmp_data.tmp2);
+//	SendString("\r\n");
+	if(tmp_data.tmp1>5000) tmp_data.tmp1 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
+	if(tmp_data.tmp2>5000) tmp_data.tmp2 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
 
 }
 

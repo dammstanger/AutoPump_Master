@@ -27,6 +27,8 @@
 #include "YXD19264D_51.h"
 #include "LCD_GUI.h"
 #include "Sensor.h"
+#include "Key.h"
+#include "Time.h"
 /****************************宏定义***********************************************/
 #define P2_5	0x20
 #define P2_7	0x80
@@ -38,6 +40,7 @@
 //                    		7		6		5		4		3		2		1		0		Reset Value
 char g_sysflag = 0;		//	保留	保留	保留	保留	|		状态	|		模式	0000 0000
 bit g_timeoverflg=0;
+
 //---------------------------------------------
 sbit START 	= P2^7;
 sbit STOP	= P2^5;
@@ -55,36 +58,28 @@ void SendTemp(uint temp);
 
 
 
-void delay200ms(void)   //误差 -0.000000000028us
-{
-    unsigned char a,b,c;
-    for(c=178;c>0;c--)
-        for(b=230;b>0;b--)
-            for(a=12;a>0;a--);
-}
-
-void delay1s(void)   ////11.0592 STC1T 误差 -0.000000000099us
-{
-    unsigned char a,b,c;
-    for(c=217;c>0;c--)
-        for(b=171;b>0;b--)
-            for(a=73;a>0;a--);
-}
 
 void EXTI0_Init()
 {
 	IT0 = 1;                        //set INT0 int type (1:Falling 0:Low level)
     EX0 = 1;                        //enable INT0 interrupt
 }
-
+void T0_EXT_Init()
+{
+	WAKE_CLKO = 0x10;               //将Timer0的中断用于外部下降沿中断
+    ET0 = 1;                        //enable T0 interrupt
+}
 
 void main()
 {
+	char key;
+	char rolltime=10;
 	delay1s();
 	AUXR = AUXR|0x40;  	// T1, 1T Mode
 
 //	IE2 |= ESPI;
-	EXTI0_Init();                         
+	EXTI0_Init();     
+	T0_EXT_Init();	
 	UART_Init();
 	SPI_Init(MASTER);
 	IIC_GPIO_Config();
@@ -92,14 +87,42 @@ void main()
 	LCD_Init();
 	delay1s();
 	DS3231_Init();
+//	DS3231_SetTime(RTCtime);
 	SI4432_Init();
 	SI4432_SetRxMode();	//接收模式
 	//-----------------------------------------------------
-	EA = 1;								//注意：外设初始化完再开中断！
+	IE0 = 0;
+	IE1 = 0;
+	TI = 0;
+	EA = 1;				//注意：外设初始化完再开中断！
+	SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
+	GUI_HomePage();
 	while(1)
 	{	
 		//按键扫描----------------------------------------------
-		
+		key = Key_Scan();
+		//处理键值-----------------------------------------------	
+		if(key!=KEY_NONE)
+		{
+			rolltime = 10;
+			LCD_BL_ON;
+			switch(GUI_Operation(key))
+			{
+				case 1 :{
+					GUI_DisplayPassword();
+					GUI_Setting();
+					LCD_Clear();
+					GUI_HomePage();
+				}break;
+				case 2 :{
+					GUI_History();
+				}break;
+				default :{
+					;
+				}break;
+			}
+			SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
+		}			
 		//确定系统状态------------------------------------------
 		g_sysflag &= ~STATUS; 
 		if(CAPWAI==1)
@@ -111,37 +134,9 @@ void main()
 		else if(CAPNEI==0)							//别家抽水
 			g_sysflag |= WORK_OUT;
 		
-		//-----------------------------------------------	
 		switch(g_sysflag&STATUS)
 		{
 			case FREE :{
-				GUI_HomePage();
-				while(1)
-				{
-					//发送采集数据指令
-					DATA_Cmd_Pkg_Send();
-					if(Trans_RevPakFin)
-					{
-						Trans_RevPakFin = 0;
-						if(2==Pak_Handle())
-						{
-							SendString("valid data received.\r\n");		
-							PressDatHandle();				
-							TemperDatHandle();
-						}
-					}
-					DS3231_Init();
-					LED1 = 0;
-					delay1s();
-					delay1s();
-					delay1s();
-					LCD_Clear();		//清屏
-					GUI_HomePage2();
-					LED1 = 1;
-					delay1s();
-					delay1s();
-					delay1s();
-				}//end of while
 			}break;
 			case WORK_SELF :{
 				
@@ -151,9 +146,39 @@ void main()
 			}break;
 			case SWOFF :{
 				
-			}break;		}
+			}break;		
+		}//end of switch
+		if(ReadSoftTimer(TIMER_2))			//滚动时间到
+		{	LCD_BL_OFF;
+			if(g_homepage)
+			{
+				//发送采集数据指令
+				DATA_Cmd_Pkg_Send();
+				if(Trans_RevPakFin)
+				{
+					Trans_RevPakFin = 0;
+					if(2==Pak_Handle())
+					{
+						SendString("valid data received.\r\n");		
+						PressDatHandle();				
+						TemperDatHandle();
+					}
+				}
+				LCD_Clear();
+				delay100ms();
+				GUI_HomePage();
+			}
+			else{
+				DS3231_ReadTime();
+				LCD_Clear();
+				delay100ms();
+				GUI_HomePage2();
+			}
+			SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
+		}
 
-	}
+
+	}//end of while
 }
 
 void SendTemp(uint temp)
@@ -171,6 +196,11 @@ void EXTI0_ISR() interrupt 0
 {	//响应后IE0自动清除
 	SI4432_ISR();
 //	SendString("ISR completed.\r\n");					//调试信息时候用	
+}
+
+void T0_EXT_ISR() interrupt 1
+{	//响应后IE1自动清除
+	SoftTimer();
 }
 
 /******************* (C) COPYRIGHT 2016 DammStanger *****END OF FILE************/

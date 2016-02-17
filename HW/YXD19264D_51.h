@@ -104,7 +104,7 @@ void LCD_Dis_Char_16_16(uchar row,uchar col,uchar *dat, bool invert);
 void LCD_Dis_Char_8_16(uchar row,uchar col,uchar *dat, bool invert);
 void LCD_Dis_ASCIIStr(uchar row,uchar col,uchar *str, bool invert);
 void LCD_Dis_Digital_float(uchar row, uchar col,long Dig_Data);
-void LCD_Dis_Digital_int(uchar row, uchar col,long Dig_Data);
+void LCD_Dis_Digital_int(uchar row, uchar col,uchar reserve,long Dig_Data);
 
 void LCD_Dis_Pict(uchar row, uchar col, uchar row_Pixel, uchar col_Pixel,uchar *Dis_Data);
 void LCD_Clear_Region(uchar row, uchar col, uchar row_Pixel, uchar col_Pixel);

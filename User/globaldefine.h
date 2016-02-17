@@ -44,5 +44,7 @@ sbit LED2 = P5^1;
 
 /****************************变量声明*********************************************/
 extern char g_sysflag;
+extern bit g_homepage;				//主界面标记，0界面1 =1界面2
+
 #endif
 /******************* (C) COPYRIGHT 2015 DammStanger *****END OF FILE************/

@@ -378,6 +378,11 @@
               <FileType>1</FileType>
               <FilePath>..\HW\YXD19264D_51.c</FilePath>
             </File>
+            <File>
+              <FileName>Key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HW\Key.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -397,6 +402,11 @@
               <FileName>IIC_soft_51.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\BSP\IIC_soft_51.c</FilePath>
+            </File>
+            <File>
+              <FileName>Time.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\Time.c</FilePath>
             </File>
           </Files>
         </Group>
