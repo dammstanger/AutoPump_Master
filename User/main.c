@@ -29,6 +29,7 @@
 #include "Sensor.h"
 #include "Key.h"
 #include "Time.h"
+#include "EEPROM_51.h"
 /****************************宏定义***********************************************/
 #define P2_5	0x20
 #define P2_7	0x80
@@ -73,14 +74,15 @@ void T0_EXT_Init()
 void main()
 {
 	char key;
-	char rolltime=10;
+	uchar i=0;
 	delay1s();
 	AUXR = AUXR|0x40;  	// T1, 1T Mode
 
 //	IE2 |= ESPI;
+	UART_Init();
+	IAP_EEPROMCheck();
 	EXTI0_Init();     
 	T0_EXT_Init();	
-	UART_Init();
 	SPI_Init(MASTER);
 	IIC_GPIO_Config();
 	LCD_GPIOInit();
@@ -95,7 +97,7 @@ void main()
 	IE1 = 0;
 	TI = 0;
 	EA = 1;				//注意：外设初始化完再开中断！
-	SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
+	SetSoftTimer(TIMER_2,5);		//设置主界面滚动延时
 	GUI_HomePage();
 	while(1)
 	{	
@@ -104,7 +106,6 @@ void main()
 		//处理键值-----------------------------------------------	
 		if(key!=KEY_NONE)
 		{
-			rolltime = 10;
 			LCD_BL_ON;
 			switch(GUI_Operation(key))
 			{
@@ -121,7 +122,7 @@ void main()
 					;
 				}break;
 			}
-			SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
+			SetSoftTimer(TIMER_2,5);		//设置主界面滚动延时
 		}			
 		//确定系统状态------------------------------------------
 		g_sysflag &= ~STATUS; 
@@ -167,16 +168,25 @@ void main()
 				LCD_Clear();
 				delay100ms();
 				GUI_HomePage();
+				for(i=0;i<10;i++)
+				{
+					IAP_WriteByte(EEPROM_SECT1+i,i);
+				}
 			}
 			else{
 				DS3231_ReadTime();
 				LCD_Clear();
 				delay100ms();
 				GUI_HomePage2();
+				for(i=0;i<10;i++)
+				{
+					SendString("EEPROM data:\r\n");
+					SendByteASCII(IAP_ReadByte(EEPROM_SECT1+i));
+					SendString("\r\n");
+				}
 			}
-			SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
+			SetSoftTimer(TIMER_2,2);		//设置主界面滚动延时
 		}
-
 
 	}//end of while
 }
