@@ -56,26 +56,26 @@ void LCD_FlashArrows(bool enable)
 
 void GUI_PasswordMenu(char num)
 {
-	if(num==0) 	LCD_Dis_ASCIIStr(4,2,"0",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,2,"0",FALSE);
-	if(num==1) 	LCD_Dis_ASCIIStr(4,4,"1",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,4,"1",FALSE);
-	if(num==2) 	LCD_Dis_ASCIIStr(4,6,"2",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,6,"2",FALSE);
-	if(num==3) 	LCD_Dis_ASCIIStr(4,8,"3",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,8,"3",FALSE);
-	if(num==4) 	LCD_Dis_ASCIIStr(4,10,"4",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,10,"4",FALSE);
-	if(num==5) 	LCD_Dis_ASCIIStr(4,12,"5",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,12,"5",FALSE);
-	if(num==6) 	LCD_Dis_ASCIIStr(4,14,"6",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,14,"6",FALSE);
-	if(num==7) 	LCD_Dis_ASCIIStr(4,16,"7",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,16,"7",FALSE);
-	if(num==8) 	LCD_Dis_ASCIIStr(4,18,"8",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,18,"8",FALSE);
-	if(num==9) 	LCD_Dis_ASCIIStr(4,20,"9",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,20,"9",FALSE);
+	if(num==0) 	LCD_Dis_ASCIIStr(4,3,"0",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,3,"0",FALSE);
+	if(num==1) 	LCD_Dis_ASCIIStr(4,5,"1",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,5,"1",FALSE);
+	if(num==2) 	LCD_Dis_ASCIIStr(4,7,"2",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,7,"2",FALSE);
+	if(num==3) 	LCD_Dis_ASCIIStr(4,9,"3",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,9,"3",FALSE);
+	if(num==4) 	LCD_Dis_ASCIIStr(4,11,"4",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,11,"4",FALSE);
+	if(num==5) 	LCD_Dis_ASCIIStr(4,13,"5",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,13,"5",FALSE);
+	if(num==6) 	LCD_Dis_ASCIIStr(4,15,"6",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,15,"6",FALSE);
+	if(num==7) 	LCD_Dis_ASCIIStr(4,17,"7",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,17,"7",FALSE);
+	if(num==8) 	LCD_Dis_ASCIIStr(4,19,"8",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,19,"8",FALSE);
+	if(num==9) 	LCD_Dis_ASCIIStr(4,21,"9",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,21,"9",FALSE);
 }
 	
 
@@ -91,16 +91,16 @@ char GUI_DisplayPassword()
 	LCD_Dis_Char_16_16(1,7,&WordLib_CN[48][0],FALSE);	
 	LCD_Dis_Char_16_16(1,8,&WordLib_CN[49][0],FALSE);		
 	LCD_Dis_ASCIIStr(1,17,":",FALSE);	
-	LCD_Dis_ASCIIStr(4,2,"0",TRUE);
-	LCD_Dis_ASCIIStr(4,4,"1",FALSE);
-	LCD_Dis_ASCIIStr(4,6,"2",FALSE);
-	LCD_Dis_ASCIIStr(4,8,"3",FALSE);
-	LCD_Dis_ASCIIStr(4,10,"4",FALSE);
-	LCD_Dis_ASCIIStr(4,12,"5",FALSE);
-	LCD_Dis_ASCIIStr(4,14,"6",FALSE);
-	LCD_Dis_ASCIIStr(4,16,"7",FALSE);
-	LCD_Dis_ASCIIStr(4,18,"8",FALSE);
-	LCD_Dis_ASCIIStr(4,20,"9",FALSE);
+	LCD_Dis_ASCIIStr(4,3,"0",TRUE);
+	LCD_Dis_ASCIIStr(4,5,"1",FALSE);
+	LCD_Dis_ASCIIStr(4,7,"2",FALSE);
+	LCD_Dis_ASCIIStr(4,9,"3",FALSE);
+	LCD_Dis_ASCIIStr(4,11,"4",FALSE);
+	LCD_Dis_ASCIIStr(4,13,"5",FALSE);
+	LCD_Dis_ASCIIStr(4,15,"6",FALSE);
+	LCD_Dis_ASCIIStr(4,17,"7",FALSE);
+	LCD_Dis_ASCIIStr(4,19,"8",FALSE);
+	LCD_Dis_ASCIIStr(4,21,"9",FALSE);
 	while(1)
 	{
 		keyval = Key_Scan();	
@@ -114,7 +114,11 @@ char GUI_DisplayPassword()
 			else if(keyval==KEY_UP) 
 			{
 				if(wei++<=6)
+				{
 					LCD_Dis_ASCIIStr(2,19-wei*2," ",FALSE);
+					input /= 10; 
+					
+				}
 				else wei = 6;
 					
 			}	
