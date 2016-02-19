@@ -122,7 +122,7 @@ void main()
 					;
 				}break;
 			}
-			SetSoftTimer(TIMER_2,5);		//设置主界面滚动延时
+			SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
 		}			
 		//确定系统状态------------------------------------------
 		g_sysflag &= ~STATUS; 
@@ -168,24 +168,15 @@ void main()
 				LCD_Clear();
 				delay100ms();
 				GUI_HomePage();
-				for(i=0;i<10;i++)
-				{
-					IAP_WriteByte(EEPROM_SECT1+i,i);
-				}
 			}
 			else{
 				DS3231_ReadTime();
 				LCD_Clear();
 				delay100ms();
 				GUI_HomePage2();
-				for(i=0;i<10;i++)
-				{
-					SendString("EEPROM data:\r\n");
-					SendByteASCII(IAP_ReadByte(EEPROM_SECT1+i));
-					SendString("\r\n");
-				}
+
 			}
-			SetSoftTimer(TIMER_2,2);		//设置主界面滚动延时
+			SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
 		}
 
 	}//end of while
