@@ -3,7 +3,7 @@
  * 文件名	：LCD_GUI.h
  * 描	述	：GUI设计
  *                    
- * 实验平台	：51开发板
+ * 实验平台	：AutoPumpV2.0
  * 硬件连接	：
  * 版 	本	：V0.0.160217
  * 从属关系	：PoolAuto
@@ -36,6 +36,9 @@ void GUI_Operation(char keyval);
 char GUI_DisplayPassword(void);
 void GUI_Setting(void);
 void GUI_ModeSetting(void);
+void GUI_SRARTLSetting(void);
+void GUI_STOPLSetting(void);
+void GUI_DATETIMESetting(void);
 void GUI_History(void);
 void GUI_CaseData_Dis(char percent,char refill);
 void GUI_HomePage(void);

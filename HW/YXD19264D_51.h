@@ -1,21 +1,20 @@
 /******************** (C) COPYRIGHT 2015 DammStanger *****************************************
 **--------------文件信息----------------------------------------------------------
- * 文件名	：lcd_YXD19264D_51.h
- * 描	述	：YXD19264D液晶显示屏
+ * 文件名	：YXD19264D_51.h
+ * 描	述	：YXD19264D液晶显示屏		_nop_();延时在此约1us 11.0592MHz
  *                    
- * 实验平台	：51开发板
+ * 实验平台	：AutoPumpV2.0
  * 硬件连接	：
- * 版 	本	：V0.0.150711
+ * 版 	本	：V0.0.160220
  * 从属关系	：PoolAuto
  * 库版本	：无
  * 创建时间	：2015.7.11
- * 最后编辑	：2015.7.11
+ * 最后编辑	：2016.2.20
  **-------------------------------------------------------------------------------
 
  * 作	者	：Damm Stanger
  * 邮	箱	：dammstanger@qq.com
 **********************************************************************************************/
-
 #ifndef __LCD_YXD19264_51_H
 #define __LCD_YXD19264_51_H
 
@@ -104,7 +103,7 @@ void LCD_Dis_Char_16_16(uchar row,uchar col,uchar *dat, bool invert);
 void LCD_Dis_Char_8_16(uchar row,uchar col,uchar *dat, bool invert);
 void LCD_Dis_ASCIIStr(uchar row,uchar col,uchar *str, bool invert);
 void LCD_Dis_Digital_float(uchar row, uchar col,long Dig_Data);
-void LCD_Dis_Digital_int(uchar row, uchar col,uchar reserve,long Dig_Data);
+void LCD_Dis_Digital_int(uchar row, uchar col,uchar reserve,long Dig_Data, bool invert);
 
 void LCD_Dis_Pict(uchar row, uchar col, uchar row_Pixel, uchar col_Pixel,uchar *Dis_Data);
 void LCD_Clear_Region(uchar row, uchar col, uchar row_Pixel, uchar col_Pixel);

@@ -121,9 +121,6 @@ void main()
 		switch(g_menumark)
 		{
 			case MENU_OPERATE 	:{
-//				SendByteASCII(g_menumark>>8);
-//				SendByteASCII(key);
-//				SendString("\n\r");
 				GUI_Operation(key);
 				SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
 				}break;
@@ -141,12 +138,9 @@ void main()
 		switch(g_menumark)
 		{
 			case MENU_MODE :{GUI_ModeSetting();}break;
-			case MENU_STARTL :{
-			}break;
-			case MENU_STOPL :{
-			}break;
-			case MENU_DATETIME :{
-			}break;
+			case MENU_STARTL :{GUI_SRARTLSetting();}break;
+			case MENU_STOPL :{GUI_STOPLSetting();}break;
+			case MENU_DATETIME :{ GUI_DATETIMESetting();}break;
 			case MENU_KEYSET :{
 			}break;
 			case MENU_BACKLIT :{

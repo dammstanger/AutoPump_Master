@@ -3,13 +3,13 @@
  * 文件名	：YXD19264D_51.c
  * 描	述	：YXD19264D液晶显示屏		_nop_();延时在此约1us 11.0592MHz
  *                    
- * 实验平台	：51开发板
+ * 实验平台	：AutoPumpV2.0
  * 硬件连接	：
- * 版 	本	：V0.0.150711
+ * 版 	本	：V0.0.160220
  * 从属关系	：PoolAuto
  * 库版本	：无
  * 创建时间	：2015.7.11
- * 最后编辑	：2016.2.6
+ * 最后编辑	：2016.2.20
  **-------------------------------------------------------------------------------
 
  * 作	者	：Damm Stanger
@@ -358,7 +358,7 @@ void LCD_Dis_Digital_float(uchar row, uchar col,long Dig_Data)
       		Dig_Data: 显示的十进制数
 			reserve: 保留几位数字， 为0则为自动
 ******************************************************************************/
-void LCD_Dis_Digital_int(uchar row, uchar col,uchar reserve,long Dig_Data)
+void LCD_Dis_Digital_int(uchar row, uchar col,uchar reserve,long Dig_Data, bool invert)
 {
 	uchar bitbuf[10]={0};
 	uchar i=0,j=9;
@@ -392,7 +392,7 @@ void LCD_Dis_Digital_int(uchar row, uchar col,uchar reserve,long Dig_Data)
 	}
 	for(j=0;j<i;j++)			//s输出显示，超过本行时在下一行右边显示
 	{
-		LCD_Dis_Char_8_16(row,col--,&CharLib_ASCII[bitbuf[j]-32][0],FALSE);
+		LCD_Dis_Char_8_16(row,col--,&CharLib_ASCII[bitbuf[j]-32][0],invert);
 		if(col==0)
 		{
 			row++;
@@ -700,9 +700,6 @@ void LCD_fill_Region(uchar row, uchar col, uchar row_Pixel, uchar col_Pixel)
 		LCD_Write(unit_en_o,LCD_Write_Con_Cmd,SET_STCOL_BASE|col_first);
 		LCD_Write(LCD_UALL,LCD_Write_Con_Cmd,SET_STRPAG_BASE|(page_first+i)%8+1);//										归入0-7范围
 	}
-//	LCD_Dis_Digital(2,5,row_page_need);
-//	LCD_Dis_Digital(3,5,ReadBuf_head[0]);
-//	LCD_Dis_Digital(4,5,ReadBuf_end[0]);
 }
 
 /***************************************

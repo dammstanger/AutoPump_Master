@@ -3,7 +3,7 @@
  * 文件名	：globaldefine.h
  * 描	述	：
  *                    
- * 实验平台	：51开发板
+ * 实验平台	：AutoPumpV2.0
  * 硬件连接	：
  * 版 	本	：V0.0.150711
  * 从属关系	：PoolAuto

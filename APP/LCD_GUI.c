@@ -3,7 +3,7 @@
  * 文件名	：LCD_GUI.c
  * 描	述	：GUI设计
  *                    
- * 实验平台	：51开发板
+ * 实验平台	：AutoPumpV2.0
  * 硬件连接	：
  * 版 	本	：V0.0.160217
  * 从属关系	：PoolAuto
@@ -29,6 +29,43 @@ bit g_homepage = 0;				//主界面标记，0界面1 =1界面2
 
 char needkey = 0;
 long keyword = 123456;
+
+/****************************函数声明*********************************************/
+void GUI_SettingMenu(char num, char turn);
+void GUI_HomeMenu(char selitem);
+void GUI_PasswordMenu(char num);
+void GUI_ModeSettingMenu(char num);
+void GUI_PecentSettingMenu(uchar num,uchar wei);
+
+
+/********************************************************************************
+ * 函数名：GUI_DisplayWaterTemp()
+ * 描述  ：显示水温
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_DisplayWaterTemp()
+{	
+	//显示温度
+	LCD_Dis_Digital_float(1,22,tmp_data.tmp2);
+}
+
+
+/********************************************************************************
+ * 函数名：GUI_DisplayAirTemp()
+ * 描述  ：显示水温
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：内外部调用
+ ********************************************************************************/
+void GUI_DisplayAirTemp()
+{	
+	//显示温度
+	LCD_Dis_Digital_float(4,14,tmp_data.tmp1);						//从右往左的顺序增长
+}
+
+
 /********************************************************************************
  * 函数名：LCD_FlashArrows()
  * 描述  ：箭头闪烁
@@ -57,29 +94,6 @@ void LCD_FlashArrows(bool enable)
 	
 }
 
-void GUI_PasswordMenu(char num)
-{
-	if(num==0) 	LCD_Dis_ASCIIStr(4,3,"0",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,3,"0",FALSE);
-	if(num==1) 	LCD_Dis_ASCIIStr(4,5,"1",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,5,"1",FALSE);
-	if(num==2) 	LCD_Dis_ASCIIStr(4,7,"2",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,7,"2",FALSE);
-	if(num==3) 	LCD_Dis_ASCIIStr(4,9,"3",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,9,"3",FALSE);
-	if(num==4) 	LCD_Dis_ASCIIStr(4,11,"4",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,11,"4",FALSE);
-	if(num==5) 	LCD_Dis_ASCIIStr(4,13,"5",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,13,"5",FALSE);
-	if(num==6) 	LCD_Dis_ASCIIStr(4,15,"6",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,15,"6",FALSE);
-	if(num==7) 	LCD_Dis_ASCIIStr(4,17,"7",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,17,"7",FALSE);
-	if(num==8) 	LCD_Dis_ASCIIStr(4,19,"8",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,19,"8",FALSE);
-	if(num==9) 	LCD_Dis_ASCIIStr(4,21,"9",TRUE);
-	else 		LCD_Dis_ASCIIStr(4,21,"9",FALSE);
-}
 	
 /********************************************************************************
  * 函数名：GUI_DisplayPassword()
@@ -161,6 +175,695 @@ char GUI_DisplayPassword()
 		
 }
 
+/********************************************************************************
+ * 函数名：GUI_Setting()
+ * 描述  ：显示
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_Setting()
+{
+	char keyval,selitem=1,turn=0;
+	LCD_Clear();
+	GUI_SettingMenu(selitem,turn);
+	while(1)
+	{
+		keyval = Key_Scan();	
+		if(keyval!=KEY_NONE)
+		{	
+			if(keyval==KEY_HOME||keyval==KEY_L) 
+			{
+				g_menumark = MENU_OPERATE;return ;
+			}
+			else if(keyval==KEY_UP)
+			{
+				selitem--;
+				if(selitem<1) {selitem = 6;turn = 1;}
+				else if(selitem==4){turn = 1;}
+				else turn = 0;
+			}
+			else if(keyval==KEY_DOWN)
+			{
+				selitem++;
+				if(selitem>6) {selitem = 1;turn = 1;}
+				else if(selitem==5){turn = 1;}
+				else turn = 0;
+			}	
+			else if(keyval==KEY_ENTER||keyval==KEY_R)
+			{
+				g_menumark = MENU_SET|(selitem<<4);
+				return ;
+			}//if(keyval==KEY_ENTER)
+			GUI_SettingMenu(selitem,turn);
+		}//if(keyval!=KEY_NONE)
+	}//while(1)
+}
+
+
+/********************************************************************************
+ * 函数名：GUI_ModeSetting()
+ * 描述  ：显示模式设置
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_ModeSetting()
+{
+	char keyval,selitem=1;
+	LCD_Clear();
+	GUI_ModeSettingMenu(selitem);
+	while(1)
+	{
+		keyval = Key_Scan();	
+		if(keyval!=KEY_NONE)
+		{	
+			if(keyval==KEY_HOME) 
+			{
+				g_menumark = MENU_OPERATE;
+				return ;
+			}
+			else if(keyval==KEY_UP)
+			{
+				selitem--;
+				if(selitem<1) selitem = 2;
+			}
+			else if(keyval==KEY_DOWN)
+			{
+				selitem++;
+				if(selitem>2) selitem = 1;
+			}
+			GUI_ModeSettingMenu(selitem);
+			
+			if(keyval==KEY_ENTER)
+			{
+				g_menumark = MENU_OPERATE;
+				return ;
+			}//if(keyval==KEY_ENTER)
+		}//if(keyval!=KEY_NONE)
+	}//while(1)
+	
+}
+
+
+
+/********************************************************************************
+ * 函数名：GUI_SRARTLSetting()
+ * 描述  ：自动抽水液位设置
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_SRARTLSetting()
+{
+	char keyval,wei = 3,input = 0;
+	
+	LCD_Clear();
+	LCD_Dis_Char_16_16(1,2,&WordLib_CN[13][0],FALSE);		//自动抽水液位设置
+	LCD_Dis_Char_16_16(1,3,&WordLib_CN[14][0],FALSE);		
+	LCD_Dis_Char_16_16(1,4,&WordLib_CN[52][0],FALSE);		
+	LCD_Dis_Char_16_16(1,5,&WordLib_CN[4][0],FALSE);		
+	LCD_Dis_Char_16_16(1,6,&WordLib_CN[4][0],FALSE);		
+	LCD_Dis_Char_16_16(1,7,&WordLib_CN[5][0],FALSE);		
+	LCD_Dis_Char_16_16(1,8,&WordLib_CN[27][0],FALSE);		
+	LCD_Dis_Char_16_16(1,9,&WordLib_CN[28][0],FALSE);		
+	GUI_PecentSettingMenu(input,wei);
+	while(1)
+	{
+		keyval = Key_Scan();	
+		if(keyval!=KEY_NONE)
+		{	
+			if(keyval==KEY_HOME) 
+			{
+				g_menumark = MENU_OPERATE;
+				return ;
+			}
+			else if(keyval==KEY_L)
+			{
+				wei++;
+				if(wei>3) wei = 1;
+			}
+			else if(keyval==KEY_R)
+			{
+				wei--;
+				if(wei<1) wei = 3;
+			}
+			else if(keyval==KEY_UP)
+			{
+				if(wei==1) {input++;}
+				else if(wei==2) {input+=10;}
+				else if(wei==3){input+=100;}
+				if(input<0||input>100) input = 100;			//溢出转负啦，赋予最大值
+			}
+			else if(keyval==KEY_DOWN)
+			{
+				if(wei==1) {input--;}
+				else if(wei==2) {input-=10;}
+				else if(wei==3){input-=100;}
+				if(input<0) input = 0;
+			}
+			GUI_PecentSettingMenu(input,wei);
+			
+			if(keyval==KEY_ENTER)
+			{
+				g_menumark = MENU_OPERATE;
+				return ;
+			}//if(keyval==KEY_ENTER)
+		}//if(keyval!=KEY_NONE)
+	}//while(1)
+}
+
+/********************************************************************************
+ * 函数名：GUI_STOPLSetting()
+ * 描述  ：自动停水液位设置
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_STOPLSetting()
+{
+	char keyval,wei = 3,input = 100;
+	
+	LCD_Clear();
+	LCD_Dis_Char_16_16(1,2,&WordLib_CN[13][0],FALSE);		//自动停水液位设置
+	LCD_Dis_Char_16_16(1,3,&WordLib_CN[14][0],FALSE);		
+	LCD_Dis_Char_16_16(1,4,&WordLib_CN[56][0],FALSE);		
+	LCD_Dis_Char_16_16(1,5,&WordLib_CN[4][0],FALSE);		
+	LCD_Dis_Char_16_16(1,6,&WordLib_CN[4][0],FALSE);		
+	LCD_Dis_Char_16_16(1,7,&WordLib_CN[5][0],FALSE);		
+	LCD_Dis_Char_16_16(1,8,&WordLib_CN[27][0],FALSE);		
+	LCD_Dis_Char_16_16(1,9,&WordLib_CN[28][0],FALSE);		
+	GUI_PecentSettingMenu(input,wei);
+	while(1)
+	{
+		keyval = Key_Scan();	
+		if(keyval!=KEY_NONE)
+		{	
+			if(keyval==KEY_HOME) 
+			{
+				g_menumark = MENU_OPERATE;
+				return ;
+			}
+			else if(keyval==KEY_L)
+			{
+				wei++;
+				if(wei>3) wei = 1;
+			}
+			else if(keyval==KEY_R)
+			{
+				wei--;
+				if(wei<1) wei = 3;
+			}
+			else if(keyval==KEY_UP)
+			{
+				if(wei==1) {input++;}
+				else if(wei==2) {input+=10;}
+				else if(wei==3){input+=100;}
+				if(input<0||input>100) input = 100;			//溢出转负啦，赋予最大值
+			}
+			else if(keyval==KEY_DOWN)
+			{
+				if(wei==1) {input--;}
+				else if(wei==2) {input-=10;}
+				else if(wei==3){input-=100;}
+				if(input<0) input = 0;
+			}
+			GUI_PecentSettingMenu(input,wei);
+			
+			if(keyval==KEY_ENTER)
+			{
+				g_menumark = MENU_OPERATE;
+				return ;
+			}//if(keyval==KEY_ENTER)
+		}//if(keyval!=KEY_NONE)
+	}//while(1)
+}
+
+void GUI_DateTimeSettingMenu(STC_TIME dat,uchar wei)
+{
+	uchar bit2,bit1;
+	
+	bit2 = dat.year/10%10;
+	bit1 = dat.year%10;
+
+	if(wei==1)
+		LCD_Dis_Digital_int(2,9,1,bit2,TRUE);
+	else LCD_Dis_Digital_int(2,9,1,bit2,FALSE);
+	if(wei==2)
+		LCD_Dis_Digital_int(2,10,1,bit1,TRUE);
+	else LCD_Dis_Digital_int(2,10,1,bit1,FALSE);	
+
+	if(wei==3)
+		LCD_Dis_Digital_int(2,14,2,dat.month,TRUE);
+	else LCD_Dis_Digital_int(2,14,2,dat.month,FALSE);
+	
+	if(wei==4)
+		LCD_Dis_Digital_int(2,18,2,dat.date,TRUE);
+	else LCD_Dis_Digital_int(2,18,2,dat.date,FALSE);
+
+	if(wei==5)
+		LCD_Dis_Digital_int(3,6,2,dat.hour,TRUE);
+	else LCD_Dis_Digital_int(3,6,2,dat.hour,FALSE);
+
+	if(wei==6)
+		LCD_Dis_Digital_int(3,9,2,dat.min,TRUE);
+	else LCD_Dis_Digital_int(3,9,2,dat.min,FALSE);
+	
+	if(wei==7)
+		LCD_Dis_Digital_int(3,12,2,dat.sec,TRUE);
+	else LCD_Dis_Digital_int(3,12,2,dat.sec,FALSE);
+
+	if(wei==8)
+		switch(dat.week)
+		{
+			case 1 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[39][0],TRUE);break;		
+			case 2 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[40][0],TRUE);break;		
+			case 3 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[41][0],TRUE);break;		
+			case 4 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[42][0],TRUE);break;		
+			case 5 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[43][0],TRUE);break;		
+			case 6 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[44][0],TRUE);break;		
+			case 7 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[33][0],TRUE);break;		
+		}
+	else
+		switch(dat.week)
+		{
+			case 1 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[39][0],FALSE);break;		
+			case 2 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[40][0],FALSE);break;		
+			case 3 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[41][0],FALSE);break;		
+			case 4 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[42][0],FALSE);break;		
+			case 5 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[43][0],FALSE);break;		
+			case 6 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[44][0],FALSE);break;		
+			case 7 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[33][0],FALSE);break;		
+		}
+}
+
+/********************************************************************************
+ * 函数名：GUI_DATETIMESetting()
+ * 描述  ：时间日期设置
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_DATETIMESetting()
+{
+	char keyval,wei = 1;
+	STC_TIME input = {0,0,0,1,5,1,2016,0};
+	
+	LCD_Clear();
+	LCD_Dis_Char_16_16(1,4,&WordLib_CN[12][0],FALSE);		//时间日期
+	LCD_Dis_Char_16_16(1,5,&WordLib_CN[38][0],FALSE);		
+	LCD_Dis_Char_16_16(1,6,&WordLib_CN[6][0],FALSE);		
+	LCD_Dis_Char_16_16(1,7,&WordLib_CN[7][0],FALSE);		
+	LCD_Dis_Char_16_16(1,8,&WordLib_CN[27][0],FALSE);		
+	LCD_Dis_Char_16_16(1,9,&WordLib_CN[28][0],FALSE);
+	LCD_Dis_Digital_int(2,10,4,input.year,FALSE);
+	LCD_Dis_Char_16_16(2,6,&WordLib_CN[10][0],FALSE);				//年月日
+	LCD_Dis_Char_16_16(2,8,&WordLib_CN[11][0],FALSE);		
+	LCD_Dis_Char_16_16(2,10,&WordLib_CN[12][0],FALSE);
+	LCD_Dis_ASCIIStr(3,7,":",FALSE);
+	LCD_Dis_ASCIIStr(3,10,":",FALSE);
+	LCD_Dis_Char_16_16(3,8,&WordLib_CN[37][0],FALSE);		
+	LCD_Dis_Char_16_16(3,9,&WordLib_CN[38][0],FALSE);
+
+	GUI_DateTimeSettingMenu(input,wei);
+	while(1)
+	{
+		keyval = Key_Scan();	
+		if(keyval!=KEY_NONE)
+		{	
+			if(keyval==KEY_HOME) 
+			{
+				g_menumark = MENU_OPERATE;
+				return ;
+			}
+			else if(keyval==KEY_R)
+			{
+				wei++;
+				if(wei>8) wei = 1;
+			}
+			else if(keyval==KEY_L)
+			{
+				wei--;
+				if(wei<1) wei = 8;
+			}
+			else if(keyval==KEY_UP)
+			{
+				if(wei==2) {input.year++;}
+				else if(wei==1) {input.year+=10;}
+				else if(wei==3) {input.month++;}
+				else if(wei==4) {input.date++;}
+				else if(wei==5) {input.hour++;}
+				else if(wei==6) {input.min++;}
+				else if(wei==7) {input.sec++;}
+				else if(wei==8) {input.week++;}
+				if(input.year>2099) input.year = 2000;	
+				if(input.month>12) input.month = 1;			
+				if(input.date>31) input.date = 1;			
+				if(input.hour>23) input.hour = 0;			
+				if(input.min>59) input.min = 0;			
+				if(input.sec>59) input.sec = 0;	
+				if(input.week>7) input.week = 1;
+			}
+			else if(keyval==KEY_DOWN)
+			{
+				if(wei==2) {input.year--;}
+				else if(wei==1) {input.year-=10;}
+				else if(wei==3) {input.month--;}
+				else if(wei==4) {input.date--;}
+				else if(wei==5) {input.hour--;}
+				else if(wei==6) {input.min--;}
+				else if(wei==7) {input.sec--;}
+				else if(wei==8) {input.week--;}
+				if(input.year<2000) input.year = 2099;	
+				if(input.month<1) input.month = 1;			
+				if(input.date<1) input.date = 1;			
+				if(input.hour>23) input.hour = 23;			//溢出	
+				if(input.min>59) input.min = 59;			
+				if(input.sec>59) input.sec = 59;	
+				if(input.week<1) input.week = 7;
+			}
+			GUI_DateTimeSettingMenu(input,wei);
+			
+			if(keyval==KEY_ENTER)
+			{
+				g_menumark = MENU_OPERATE;
+				return ;
+			}//if(keyval==KEY_ENTER)
+		}//if(keyval!=KEY_NONE)
+	}//while(1)
+}
+/********************************************************************************
+ * 函数名：GUI_History()
+ * 描述  ：显示
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_History()
+{
+						;
+}
+
+
+
+/********************************************************************************
+ * 函数名：GUI_Operation()
+ * 描述  ：显示操作界面		keyval==0xff表示是从别的界面返回的,类型一定是无符号的，
+							否则if判断总不成立，有待进一步考究
+ * 输入  ：-		    	
+ * 返回  ：- 进入的界面
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_Operation(uchar keyval)
+{
+	char selitem = 1;					//选择的值
+
+	if(keyval==0xff||g_homepage)		//如果在主界面2则先切回1
+	{
+		keyval = KEY_NONE;
+		LCD_Clear();
+		GUI_HomePage();					//默认就为0 HOME项
+	}
+	else 
+	{
+		SendByteASCII(keyval);
+		SendString("\n\r");
+		if(keyval==KEY_L) selitem++;
+		else if(keyval==KEY_R) selitem--;
+		if(selitem>3) selitem = 1;
+		else if(selitem<1) selitem = 3;
+	
+		GUI_HomeMenu(selitem);			//在主菜单下则可以变动
+	}
+	SetSoftTimer(TIMER_1,10);			//设置退出延时定时器 10s
+	while(1)
+	{
+		keyval = Key_Scan();
+		if(keyval!=KEY_NONE)
+		{	SetSoftTimer(TIMER_1,10);
+			if(keyval==KEY_ENTER)
+			{
+				g_menumark=selitem<<12;
+				return ;
+			}
+			else if(keyval==KEY_HOME) {g_menumark = 0;return ;}
+			else if(keyval==KEY_L) selitem++;
+			else if(keyval==KEY_R) selitem--;
+			if(selitem>3) selitem = 1;
+			else if(selitem<1) selitem = 3;
+			GUI_HomeMenu(selitem);				//在主菜单下则可以变动	
+		}
+
+		if(ReadSoftTimer(TIMER_1)) {g_menumark = 0;return ;}	//超时返回
+	}
+}
+
+/********************************************************************************
+ * 函数名：GUI_HomePage()
+ * 描述  ：显示主界面常量
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：内外部调用
+ ********************************************************************************/
+void GUI_HomePage()
+{
+	g_homepage = 0;
+	LCD_Dis_Pict(1,1,45,62,Pic_Case);
+	
+	LCD_Dis_Char_16_16(1,5,&WordLib_CN[0][0],FALSE);		//实时水温
+	LCD_Dis_Char_16_16(1,6,&WordLib_CN[1][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,7,&WordLib_CN[4][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,8,&WordLib_CN[2][0],FALSE);		//	
+	LCD_Dis_ASCIIStr(1,17,":",FALSE);
+	GUI_DisplayWaterTemp();
+	LCD_Dis_Char_8_16(1,23,&CharLib_SplLabel[0][0],FALSE);
+	LCD_Dis_ASCIIStr(1,24,"C",FALSE);
+	
+	LCD_Dis_Char_16_16(2,5,&WordLib_CN[19][0],FALSE);		//状态
+	LCD_Dis_Char_16_16(2,6,&WordLib_CN[20][0],FALSE);
+	LCD_Dis_ASCIIStr(2,13,":",FALSE);
+	LCD_Dis_Char_16_16(2,10,&WordLib_CN[21][0],FALSE);		//空闲
+	LCD_Dis_Char_16_16(2,11,&WordLib_CN[22][0],FALSE);	
+	
+	LCD_Dis_Char_16_16(3,5,&WordLib_CN[34][0],FALSE);		//模式
+	LCD_Dis_Char_16_16(3,6,&WordLib_CN[35][0],FALSE);
+	LCD_Dis_ASCIIStr(3,13,":",FALSE);
+	LCD_Dis_Char_16_16(3,10,&WordLib_CN[13][0],FALSE);		//自动
+	LCD_Dis_Char_16_16(3,11,&WordLib_CN[14][0],FALSE);	
+
+	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
+	LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
+
+	LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],FALSE);		//设置
+	LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],FALSE);		
+
+	LCD_Dis_ASCIIStr(4,19,"HOME",TRUE);						//HOME
+	
+	GUI_CaseData_Dis(55,1);
+}
+
+
+/********************************************************************************
+ * 函数名：GUI_HomePage2()
+ * 描述  ：显示主界面日历时间，室温
+ * 输入  ：-
+ * 返回  ：- 
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_HomePage2()
+{
+	g_homepage = 1;
+	LCD_Dis_Char_16_16(1,3,&WordLib_CN[4][0],FALSE);		//水位自动控制系统
+	LCD_Dis_Char_16_16(1,4,&WordLib_CN[5][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,5,&WordLib_CN[13][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,6,&WordLib_CN[14][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,7,&WordLib_CN[15][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,8,&WordLib_CN[16][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,9,&WordLib_CN[17][0],FALSE);		//
+	LCD_Dis_Char_16_16(1,10,&WordLib_CN[18][0],FALSE);		//
+	
+	LCD_Dis_Digital_int(2,10,4,RTCtime.year,FALSE);
+	LCD_Dis_Char_16_16(2,6,&WordLib_CN[10][0],FALSE);		//年月日
+	LCD_Dis_Digital_int(2,14,2,RTCtime.month,FALSE);
+	LCD_Dis_Char_16_16(2,8,&WordLib_CN[11][0],FALSE);		
+	LCD_Dis_Digital_int(2,18,2,RTCtime.date,FALSE);
+	LCD_Dis_Char_16_16(2,10,&WordLib_CN[12][0],FALSE);
+	LCD_Dis_Digital_int(3,6,2,RTCtime.hour,FALSE);					//时分秒
+	LCD_Dis_ASCIIStr(3,7,":",FALSE);
+	LCD_Dis_Digital_int(3,9,2,RTCtime.min,FALSE);
+	LCD_Dis_ASCIIStr(3,10,":",FALSE);
+	LCD_Dis_Digital_int(3,12,2,RTCtime.sec,FALSE);
+	
+	LCD_Dis_Char_16_16(3,8,&WordLib_CN[37][0],FALSE);		
+	LCD_Dis_Char_16_16(3,9,&WordLib_CN[38][0],FALSE);
+	switch(RTCtime.week)
+	{
+		case 1 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[39][0],FALSE);break;		
+		case 2 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[40][0],FALSE);break;		
+		case 3 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[41][0],FALSE);break;		
+		case 4 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[42][0],FALSE);break;		
+		case 5 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[43][0],FALSE);break;		
+		case 6 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[44][0],FALSE);break;		
+		case 7 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[33][0],FALSE);break;		
+	}
+	
+//	LCD_Dis_Char_16_16(4,1,&WordLib_CN[31][0],FALSE);		//气温
+//	LCD_Dis_Char_16_16(4,2,&WordLib_CN[2][0],FALSE);		//	
+//	LCD_Dis_ASCIIStr(4,5,":",FALSE);
+	GUI_DisplayAirTemp();
+	LCD_Dis_Char_8_16(4,15,&CharLib_SplLabel[0][0],FALSE);
+	LCD_Dis_ASCIIStr(4,16,"C",FALSE);
+}
+
+
+
+
+/********************************************************************************
+ * 函数名：GUI_HomeMenu()
+ * 描述  ：主页菜单选项
+ * 输入  ：-selitem 项
+ * 返回  ：- 
+ * 调用  ：内部调用
+ ********************************************************************************/
+void GUI_HomeMenu(char selitem)
+{
+	switch(selitem)
+	{
+		case 1 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
+					LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
+					
+					LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],FALSE);		//设置
+					LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],FALSE);		
+					
+					LCD_Dis_ASCIIStr(4,19,"HOME",TRUE);						//HOME
+		}break;
+		case 2 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
+					LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
+					
+					LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],TRUE);		//设置
+					LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],TRUE);		
+					
+					LCD_Dis_ASCIIStr(4,19,"HOME",FALSE);					//HOME
+		}break;
+		case 3 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],TRUE);		//历史
+					LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],TRUE);		
+					
+					LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],FALSE);		//设置
+					LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],FALSE);		
+					
+					LCD_Dis_ASCIIStr(4,19,"HOME",FALSE);					//HOME
+		}break;
+	}
+}
+
+
+/********************************************************************************
+ * 函数名：GUI_PasswordMenu()
+ * 描述  ：密码菜单选项
+ * 输入  ：-num= 项
+ * 返回  ：- 
+ * 调用  ：内部调用
+ ********************************************************************************/
+void GUI_PasswordMenu(char num)
+{
+	if(num==0) 	LCD_Dis_ASCIIStr(4,3,"0",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,3,"0",FALSE);
+	if(num==1) 	LCD_Dis_ASCIIStr(4,5,"1",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,5,"1",FALSE);
+	if(num==2) 	LCD_Dis_ASCIIStr(4,7,"2",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,7,"2",FALSE);
+	if(num==3) 	LCD_Dis_ASCIIStr(4,9,"3",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,9,"3",FALSE);
+	if(num==4) 	LCD_Dis_ASCIIStr(4,11,"4",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,11,"4",FALSE);
+	if(num==5) 	LCD_Dis_ASCIIStr(4,13,"5",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,13,"5",FALSE);
+	if(num==6) 	LCD_Dis_ASCIIStr(4,15,"6",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,15,"6",FALSE);
+	if(num==7) 	LCD_Dis_ASCIIStr(4,17,"7",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,17,"7",FALSE);
+	if(num==8) 	LCD_Dis_ASCIIStr(4,19,"8",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,19,"8",FALSE);
+	if(num==9) 	LCD_Dis_ASCIIStr(4,21,"9",TRUE);
+	else 		LCD_Dis_ASCIIStr(4,21,"9",FALSE);
+}
+
+
+/********************************************************************************
+ * 函数名：GUI_ModeSettingMenu()
+ * 描述  ：模式设置菜单选项
+ * 输入  ：-num= 项
+ * 返回  ：- 
+ * 调用  ：内部调用
+ ********************************************************************************/
+void GUI_ModeSettingMenu(char num)
+{
+	LCD_Dis_Char_16_16(1,4,&WordLib_CN[34][0],FALSE);			//模式设置
+	LCD_Dis_Char_16_16(1,5,&WordLib_CN[35][0],FALSE);		
+	LCD_Dis_Char_16_16(1,6,&WordLib_CN[27][0],FALSE);		
+	LCD_Dis_Char_16_16(1,7,&WordLib_CN[28][0],FALSE);	
+	if(num==1)
+	{
+		LCD_Dis_ASCIIStr(2,1,"1",TRUE);	
+		LCD_Dis_ASCIIStr(2,2,".",TRUE);
+		LCD_Dis_Char_16_16(2,2,&WordLib_CN[13][0],TRUE);		//自动
+		LCD_Dis_Char_16_16(2,3,&WordLib_CN[14][0],TRUE);		
+	}
+	else{
+		LCD_Dis_ASCIIStr(2,1,"1",FALSE);	
+		LCD_Dis_ASCIIStr(2,2,".",FALSE);
+		LCD_Dis_Char_16_16(2,2,&WordLib_CN[13][0],FALSE);		
+		LCD_Dis_Char_16_16(2,3,&WordLib_CN[14][0],FALSE);		
+	}
+	if(num==2)
+	{
+		LCD_Dis_ASCIIStr(3,1,"2",TRUE);	
+		LCD_Dis_ASCIIStr(3,2,".",TRUE);
+		LCD_Dis_Char_16_16(3,2,&WordLib_CN[36][0],TRUE);		//手动
+		LCD_Dis_Char_16_16(3,3,&WordLib_CN[14][0],TRUE);		
+	}
+	else{
+		LCD_Dis_ASCIIStr(3,1,"2",FALSE);	
+		LCD_Dis_ASCIIStr(3,2,".",FALSE);
+		LCD_Dis_Char_16_16(3,2,&WordLib_CN[36][0],FALSE);		
+		LCD_Dis_Char_16_16(3,3,&WordLib_CN[14][0],FALSE);		
+	}	
+	
+}
+
+/********************************************************************************
+ * 函数名：GUI_PecentSettingMenu()
+ * 描述  ：设置数字百分比选项
+ * 输入  ：-wei第几位数 ，num百分数
+ * 返回  ：- 
+ * 调用  ：内部调用
+ ********************************************************************************/
+void GUI_PecentSettingMenu(uchar num,uchar wei)
+{
+	uchar bai,shi,ge;
+	bai = num/100;
+	shi = num/10%10;
+	ge = num%10;
+	if(wei==3)
+		LCD_Dis_Digital_int(2,10,1,bai,TRUE);
+	else LCD_Dis_Digital_int(2,10,1,bai,FALSE);
+	if(wei==2)
+		LCD_Dis_Digital_int(2,11,1,shi,TRUE);
+	else LCD_Dis_Digital_int(2,11,1,shi,FALSE);
+	if(wei==1)
+		LCD_Dis_Digital_int(2,12,1,ge,TRUE);
+	else LCD_Dis_Digital_int(2,12,1,ge,FALSE);
+	
+	LCD_Dis_ASCIIStr(2,13,"%",FALSE);
+	
+}
+/********************************************************************************
+ * 函数名：GUI_SettingMenu()
+ * 描述  ：设置菜单选项
+ * 输入  ：-num= 项
+ * 返回  ：- 
+ * 调用  ：内部调用
+ ********************************************************************************/
 void GUI_SettingMenu(char num, char turn)
 {
 	if(turn) LCD_Clear();											//翻页
@@ -292,354 +995,6 @@ void GUI_SettingMenu(char num, char turn)
 		}
 	}
 }
-/********************************************************************************
- * 函数名：GUI_Setting()
- * 描述  ：显示
- * 输入  ：-		    	
- * 返回  ：- 
- * 调用  ：外部调用
- ********************************************************************************/
-void GUI_Setting()
-{
-	char keyval,selitem=1,turn=0;
-	LCD_Clear();
-	GUI_SettingMenu(selitem,turn);
-	while(1)
-	{
-		keyval = Key_Scan();	
-		if(keyval!=KEY_NONE)
-		{	
-			if(keyval==KEY_HOME||keyval==KEY_L) 
-			{
-				g_menumark = MENU_OPERATE;return ;
-			}
-			else if(keyval==KEY_UP)
-			{
-				selitem--;
-				if(selitem<1) {selitem = 6;turn = 1;}
-				else if(selitem==4){turn = 1;}
-				else turn = 0;
-			}
-			else if(keyval==KEY_DOWN)
-			{
-				selitem++;
-				if(selitem>6) {selitem = 1;turn = 1;}
-				else if(selitem==5){turn = 1;}
-				else turn = 0;
-			}
-			GUI_SettingMenu(selitem,turn);
-			
-			if(keyval==KEY_ENTER||keyval==KEY_R)
-			{
-				g_menumark = MENU_SET|(selitem<<4);
-				return ;
-			}//if(keyval==KEY_ENTER)
-		}//if(keyval!=KEY_NONE)
-	}//while(1)
-}
-
-
-void GUI_ModeSettingMenu(char num)
-{
-	LCD_Dis_Char_16_16(1,4,&WordLib_CN[34][0],FALSE);			//模式设置
-	LCD_Dis_Char_16_16(1,5,&WordLib_CN[35][0],FALSE);		
-	LCD_Dis_Char_16_16(1,6,&WordLib_CN[27][0],FALSE);		
-	LCD_Dis_Char_16_16(1,7,&WordLib_CN[28][0],FALSE);	
-	if(num==1)
-	{
-		LCD_Dis_ASCIIStr(2,1,"1",TRUE);	
-		LCD_Dis_ASCIIStr(2,2,".",TRUE);
-		LCD_Dis_Char_16_16(2,2,&WordLib_CN[13][0],TRUE);		//自动
-		LCD_Dis_Char_16_16(2,3,&WordLib_CN[14][0],TRUE);		
-	}
-	else{
-		LCD_Dis_ASCIIStr(2,1,"1",FALSE);	
-		LCD_Dis_ASCIIStr(2,2,".",FALSE);
-		LCD_Dis_Char_16_16(2,2,&WordLib_CN[13][0],FALSE);		
-		LCD_Dis_Char_16_16(2,3,&WordLib_CN[14][0],FALSE);		
-	}
-	if(num==2)
-	{
-		LCD_Dis_ASCIIStr(3,1,"2",TRUE);	
-		LCD_Dis_ASCIIStr(3,2,".",TRUE);
-		LCD_Dis_Char_16_16(3,2,&WordLib_CN[36][0],TRUE);		//手动
-		LCD_Dis_Char_16_16(3,3,&WordLib_CN[14][0],TRUE);		
-	}
-	else{
-		LCD_Dis_ASCIIStr(3,1,"2",FALSE);	
-		LCD_Dis_ASCIIStr(3,2,".",FALSE);
-		LCD_Dis_Char_16_16(3,2,&WordLib_CN[36][0],FALSE);		
-		LCD_Dis_Char_16_16(3,3,&WordLib_CN[14][0],FALSE);		
-	}	
-	
-}
-/********************************************************************************
- * 函数名：GUI_ModeSetting()
- * 描述  ：显示模式设置
- * 输入  ：-		    	
- * 返回  ：- 
- * 调用  ：外部调用
- ********************************************************************************/
-void GUI_ModeSetting()
-{
-	char keyval,selitem=1;
-	LCD_Clear();
-	GUI_ModeSettingMenu(selitem);
-	while(1)
-	{
-		keyval = Key_Scan();	
-		if(keyval!=KEY_NONE)
-		{	
-			if(keyval==KEY_HOME) 
-			{
-				g_menumark = MENU_OPERATE;
-				return ;
-			}
-			else if(keyval==KEY_UP)
-			{
-				selitem--;
-				if(selitem<1) selitem = 2;
-			}
-			else if(keyval==KEY_DOWN)
-			{
-				selitem++;
-				if(selitem>2) selitem = 1;
-			}
-			GUI_ModeSettingMenu(selitem);
-			
-			if(keyval==KEY_ENTER)
-			{
-				g_menumark = MENU_OPERATE;
-				return ;
-			}//if(keyval==KEY_ENTER)
-		}//if(keyval!=KEY_NONE)
-	}//while(1)
-	
-}
-	
-
-
-/********************************************************************************
- * 函数名：GUI_History()
- * 描述  ：显示
- * 输入  ：-		    	
- * 返回  ：- 
- * 调用  ：外部调用
- ********************************************************************************/
-void GUI_History()
-{
-						;
-}
-
-
-/********************************************************************************
- * 函数名：GUI_DisplayWaterTemp()
- * 描述  ：显示水温
- * 输入  ：-		    	
- * 返回  ：- 
- * 调用  ：外部调用
- ********************************************************************************/
-void GUI_DisplayWaterTemp()
-{	
-	//显示温度
-	LCD_Dis_Digital_float(1,22,tmp_data.tmp2);
-}
-
-
-/********************************************************************************
- * 函数名：GUI_DisplayAirTemp()
- * 描述  ：显示水温
- * 输入  ：-		    	
- * 返回  ：- 
- * 调用  ：内外部调用
- ********************************************************************************/
-void GUI_DisplayAirTemp()
-{	
-	//显示温度
-	LCD_Dis_Digital_float(4,14,tmp_data.tmp1);						//从右往左的顺序增长
-}
-
-
-
-void GUI_HomeMenu(char selitem)
-{
-	switch(selitem)
-	{
-		case 1 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
-					LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
-					
-					LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],FALSE);		//设置
-					LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],FALSE);		
-					
-					LCD_Dis_ASCIIStr(4,19,"HOME",TRUE);						//HOME
-		}break;
-		case 2 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
-					LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
-					
-					LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],TRUE);		//设置
-					LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],TRUE);		
-					
-					LCD_Dis_ASCIIStr(4,19,"HOME",FALSE);					//HOME
-		}break;
-		case 3 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],TRUE);		//历史
-					LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],TRUE);		
-					
-					LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],FALSE);		//设置
-					LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],FALSE);		
-					
-					LCD_Dis_ASCIIStr(4,19,"HOME",FALSE);					//HOME
-		}break;
-	}
-}
-
-/********************************************************************************
- * 函数名：GUI_Operation()
- * 描述  ：显示操作界面		keyval==0xff表示是从别的界面返回的,类型一定是无符号的，
-							否则if判断总不成立，有待进一步考究
- * 输入  ：-		    	
- * 返回  ：- 进入的界面
- * 调用  ：外部调用
- ********************************************************************************/
-void GUI_Operation(uchar keyval)
-{
-	char selitem = 1;					//选择的值
-
-	if(keyval==0xff||g_homepage)		//如果在主界面2则先切回1
-	{
-		keyval = KEY_NONE;
-		LCD_Clear();
-		GUI_HomePage();					//默认就为0 HOME项
-	}
-	else 
-	{
-		SendByteASCII(keyval);
-		SendString("\n\r");
-		if(keyval==KEY_L) selitem++;
-		else if(keyval==KEY_R) selitem--;
-		if(selitem>3) selitem = 1;
-		else if(selitem<1) selitem = 3;
-	
-		GUI_HomeMenu(selitem);			//在主菜单下则可以变动
-	}
-	SetSoftTimer(TIMER_1,10);			//设置退出延时定时器 10s
-	while(1)
-	{
-		keyval = Key_Scan();
-		if(keyval!=KEY_NONE)
-		{	SetSoftTimer(TIMER_1,10);
-			if(keyval==KEY_ENTER)
-			{
-				g_menumark=selitem<<12;
-				return ;
-			}
-			else if(keyval==KEY_HOME) {g_menumark = 0;return ;}
-			else if(keyval==KEY_L) selitem++;
-			else if(keyval==KEY_R) selitem--;
-			if(selitem>3) selitem = 1;
-			else if(selitem<1) selitem = 3;
-			GUI_HomeMenu(selitem);				//在主菜单下则可以变动	
-		}
-
-		if(ReadSoftTimer(TIMER_1)) {g_menumark = 0;return ;}	//超时返回
-	}
-}
-
-/********************************************************************************
- * 函数名：GUI_HomePage()
- * 描述  ：显示主界面常量
- * 输入  ：-		    	
- * 返回  ：- 
- * 调用  ：内外部调用
- ********************************************************************************/
-void GUI_HomePage()
-{
-	g_homepage = 0;
-	LCD_Dis_Pict(1,1,45,62,Pic_Case);
-	
-	LCD_Dis_Char_16_16(1,5,&WordLib_CN[0][0],FALSE);		//实时水温
-	LCD_Dis_Char_16_16(1,6,&WordLib_CN[1][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,7,&WordLib_CN[4][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,8,&WordLib_CN[2][0],FALSE);		//	
-	LCD_Dis_ASCIIStr(1,17,":",FALSE);
-	GUI_DisplayWaterTemp();
-	LCD_Dis_Char_8_16(1,23,&CharLib_SplLabel[0][0],FALSE);
-	LCD_Dis_ASCIIStr(1,24,"C",FALSE);
-	
-	LCD_Dis_Char_16_16(2,5,&WordLib_CN[19][0],FALSE);		//状态
-	LCD_Dis_Char_16_16(2,6,&WordLib_CN[20][0],FALSE);
-	LCD_Dis_ASCIIStr(2,13,":",FALSE);
-	LCD_Dis_Char_16_16(2,10,&WordLib_CN[21][0],FALSE);		//空闲
-	LCD_Dis_Char_16_16(2,11,&WordLib_CN[22][0],FALSE);	
-	
-	LCD_Dis_Char_16_16(3,5,&WordLib_CN[34][0],FALSE);		//模式
-	LCD_Dis_Char_16_16(3,6,&WordLib_CN[35][0],FALSE);
-	LCD_Dis_ASCIIStr(3,13,":",FALSE);
-	LCD_Dis_Char_16_16(3,10,&WordLib_CN[13][0],FALSE);		//自动
-	LCD_Dis_Char_16_16(3,11,&WordLib_CN[14][0],FALSE);	
-
-	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
-	LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
-
-	LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],FALSE);		//设置
-	LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],FALSE);		
-
-	LCD_Dis_ASCIIStr(4,19,"HOME",TRUE);						//HOME
-	
-	GUI_CaseData_Dis(55,1);
-}
-
-
-/********************************************************************************
- * 函数名：GUI_HomePage2()
- * 描述  ：显示主界面日历时间，室温
- * 输入  ：-
- * 返回  ：- 
- * 调用  ：外部调用
- ********************************************************************************/
-void GUI_HomePage2()
-{
-	g_homepage = 1;
-	LCD_Dis_Char_16_16(1,3,&WordLib_CN[4][0],FALSE);		//水位自动控制系统
-	LCD_Dis_Char_16_16(1,4,&WordLib_CN[5][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,5,&WordLib_CN[13][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,6,&WordLib_CN[14][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,7,&WordLib_CN[15][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,8,&WordLib_CN[16][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,9,&WordLib_CN[17][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,10,&WordLib_CN[18][0],FALSE);		//
-	
-	LCD_Dis_Digital_int(2,10,4,RTCtime.year);
-	LCD_Dis_Char_16_16(2,6,&WordLib_CN[10][0],FALSE);		//年月日
-	LCD_Dis_Digital_int(2,14,2,RTCtime.month);
-	LCD_Dis_Char_16_16(2,8,&WordLib_CN[11][0],FALSE);		
-	LCD_Dis_Digital_int(2,18,2,RTCtime.date);
-	LCD_Dis_Char_16_16(2,10,&WordLib_CN[12][0],FALSE);
-	LCD_Dis_Digital_int(3,6,2,RTCtime.hour);					//时分秒
-	LCD_Dis_ASCIIStr(3,7,":",FALSE);
-	LCD_Dis_Digital_int(3,9,2,RTCtime.min);
-	LCD_Dis_ASCIIStr(3,10,":",FALSE);
-	LCD_Dis_Digital_int(3,12,2,RTCtime.sec);
-	
-	LCD_Dis_Char_16_16(3,8,&WordLib_CN[37][0],FALSE);		
-	LCD_Dis_Char_16_16(3,9,&WordLib_CN[38][0],FALSE);
-	switch(RTCtime.week)
-	{
-		case 1 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[39][0],FALSE);break;		
-		case 2 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[40][0],FALSE);break;		
-		case 3 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[41][0],FALSE);break;		
-		case 4 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[42][0],FALSE);break;		
-		case 5 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[43][0],FALSE);break;		
-		case 6 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[44][0],FALSE);break;		
-		case 7 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[33][0],FALSE);break;		
-	}
-	
-//	LCD_Dis_Char_16_16(4,1,&WordLib_CN[31][0],FALSE);		//气温
-//	LCD_Dis_Char_16_16(4,2,&WordLib_CN[2][0],FALSE);		//	
-//	LCD_Dis_ASCIIStr(4,5,":",FALSE);
-	GUI_DisplayAirTemp();
-	LCD_Dis_Char_8_16(4,15,&CharLib_SplLabel[0][0],FALSE);
-	LCD_Dis_ASCIIStr(4,16,"C",FALSE);
-}
 
 
 /********************************************************************************
@@ -745,7 +1100,7 @@ void GUI_CaseData_Dis(char percent,char refill)
 			}break;
 		}
 	}
-	LCD_Dis_Digital_int(2,4,0,percent);
+	LCD_Dis_Digital_int(2,4,0,percent,FALSE);
 	LCD_Dis_ASCIIStr(2,5,"%",FALSE);
 	if(percent==99&&percent - percent_last<0)	//从100%到99%，前面一位被水填充
 	{
@@ -753,6 +1108,9 @@ void GUI_CaseData_Dis(char percent,char refill)
 	}
 	percent_last = percent;
 }
+
+
+
 
 
 uchar code Pic_arrow[]={
