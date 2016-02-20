@@ -74,6 +74,7 @@ void T0_EXT_Init()
 void main()
 {
 	char key;
+	char setval;
 	uchar i=0;
 	delay1s();
 	AUXR = AUXR|0x40;  	// T1, 1T Mode
@@ -110,8 +111,22 @@ void main()
 			switch(GUI_Operation(key))
 			{
 				case 1 :{
-					GUI_DisplayPassword();
-					GUI_Setting();
+					if(GUI_DisplayPassword())
+						setval = GUI_Setting();
+					switch(setval)
+					{
+						case 1 : GUI_ModeSetting();break;
+						case 2 :{
+						}break;
+						case 3 :{
+						}break;
+						case 4 :{
+						}break;
+						case 5 :{
+						}break;
+						case 6 :{
+						}break;
+					}
 					LCD_Clear();
 					GUI_HomePage();
 				}break;
