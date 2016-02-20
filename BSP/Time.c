@@ -37,7 +37,7 @@ void delay100ms(void)   //
 {
     unsigned char a,b,c;
     for(c=178;c>0;c--)
-        for(b=120;b>0;b--)
+        for(b=150;b>0;b--)
             for(a=12;a>0;a--);
 }
 

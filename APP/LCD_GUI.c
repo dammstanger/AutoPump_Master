@@ -22,8 +22,9 @@
 #include "Key.h"
 #include "Time.h"
 #include "DS3231.h"
+#include "Menu.h"
+#include "UART_51.h"
 /****************************变量定义*********************************************/
-char g_guilevel = 0;			//用于标记界面从层次，在几级菜单上
 bit g_homepage = 0;				//主界面标记，0界面1 =1界面2
 
 char needkey = 0;
@@ -92,24 +93,15 @@ char GUI_DisplayPassword()
 	char keyval,selitem=0,wei=6,i=5;
 	long input=0;
 	
-	if(!needkey) return 1;									//没有设置密码
+	if(!needkey) {g_menumark = MENU_SET;return 0;}			//没有设置密码
 	LCD_Clear();
 	LCD_Dis_Char_16_16(1,4,&WordLib_CN[45][0],FALSE);		//请输入密码
 	LCD_Dis_Char_16_16(1,5,&WordLib_CN[46][0],FALSE);	
 	LCD_Dis_Char_16_16(1,6,&WordLib_CN[47][0],FALSE);		//
 	LCD_Dis_Char_16_16(1,7,&WordLib_CN[48][0],FALSE);	
 	LCD_Dis_Char_16_16(1,8,&WordLib_CN[49][0],FALSE);		
-	LCD_Dis_ASCIIStr(1,17,":",FALSE);	
-	LCD_Dis_ASCIIStr(4,3,"0",TRUE);
-	LCD_Dis_ASCIIStr(4,5,"1",FALSE);
-	LCD_Dis_ASCIIStr(4,7,"2",FALSE);
-	LCD_Dis_ASCIIStr(4,9,"3",FALSE);
-	LCD_Dis_ASCIIStr(4,11,"4",FALSE);
-	LCD_Dis_ASCIIStr(4,13,"5",FALSE);
-	LCD_Dis_ASCIIStr(4,15,"6",FALSE);
-	LCD_Dis_ASCIIStr(4,17,"7",FALSE);
-	LCD_Dis_ASCIIStr(4,19,"8",FALSE);
-	LCD_Dis_ASCIIStr(4,21,"9",FALSE);
+	LCD_Dis_ASCIIStr(1,17,":",FALSE);
+	GUI_PasswordMenu(selitem);	
 	while(1)
 	{
 		keyval = Key_Scan();	
@@ -117,8 +109,7 @@ char GUI_DisplayPassword()
 		{	
 			if(keyval==KEY_HOME) 
 			{
-				g_guilevel = 0;
-				return 0;
+				g_menumark = MENU_OPERATE;return 0;
 			}
 			else if(keyval==KEY_UP) 
 			{
@@ -148,8 +139,7 @@ char GUI_DisplayPassword()
 				else{
 					if(input==keyword)
 					{
-						g_guilevel = 2;
-						return 1;
+						g_menumark = MENU_SET;return 1;
 					}
 					else{
 						LCD_Clear_Region(17,1,16,192);
@@ -162,7 +152,7 @@ char GUI_DisplayPassword()
 						LCD_Clear_Region(17,1,16,192);
 						wei = 6;
 						input = 0;
-						if(--i==0) return 0;
+						if(--i==0) {g_menumark = MENU_OPERATE;return 0;}
 					}
 				}
 			}//if(keyval==KEY_ENTER)
@@ -173,7 +163,7 @@ char GUI_DisplayPassword()
 
 void GUI_SettingMenu(char num, char turn)
 {
-	if(turn) LCD_Clear();					//翻页
+	if(turn) LCD_Clear();											//翻页
 	if(num<5)
 	{
 		if(num==1)
@@ -309,7 +299,7 @@ void GUI_SettingMenu(char num, char turn)
  * 返回  ：- 
  * 调用  ：外部调用
  ********************************************************************************/
-char GUI_Setting()
+void GUI_Setting()
 {
 	char keyval,selitem=1,turn=0;
 	LCD_Clear();
@@ -321,8 +311,7 @@ char GUI_Setting()
 		{	
 			if(keyval==KEY_HOME||keyval==KEY_L) 
 			{
-				g_guilevel = 0;
-				return 0;
+				g_menumark = MENU_OPERATE;return ;
 			}
 			else if(keyval==KEY_UP)
 			{
@@ -342,7 +331,8 @@ char GUI_Setting()
 			
 			if(keyval==KEY_ENTER||keyval==KEY_R)
 			{
-				return selitem;
+				g_menumark = MENU_SET|(selitem<<4);
+				return ;
 			}//if(keyval==KEY_ENTER)
 		}//if(keyval!=KEY_NONE)
 	}//while(1)
@@ -402,7 +392,7 @@ void GUI_ModeSetting()
 		{	
 			if(keyval==KEY_HOME) 
 			{
-				g_guilevel = 0;
+				g_menumark = MENU_OPERATE;
 				return ;
 			}
 			else if(keyval==KEY_UP)
@@ -419,6 +409,7 @@ void GUI_ModeSetting()
 			
 			if(keyval==KEY_ENTER)
 			{
+				g_menumark = MENU_OPERATE;
 				return ;
 			}//if(keyval==KEY_ENTER)
 		}//if(keyval!=KEY_NONE)
@@ -477,12 +468,20 @@ void GUI_HomeMenu(char selitem)
 		case 1 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
 					LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
 					
+					LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],FALSE);		//设置
+					LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],FALSE);		
+					
+					LCD_Dis_ASCIIStr(4,19,"HOME",TRUE);						//HOME
+		}break;
+		case 2 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
+					LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
+					
 					LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],TRUE);		//设置
 					LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],TRUE);		
 					
 					LCD_Dis_ASCIIStr(4,19,"HOME",FALSE);					//HOME
 		}break;
-		case 2 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],TRUE);		//历史
+		case 3 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],TRUE);		//历史
 					LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],TRUE);		
 					
 					LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],FALSE);		//设置
@@ -490,38 +489,36 @@ void GUI_HomeMenu(char selitem)
 					
 					LCD_Dis_ASCIIStr(4,19,"HOME",FALSE);					//HOME
 		}break;
-		default :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
-					LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
-					
-					LCD_Dis_Char_16_16(4,6,&WordLib_CN[27][0],FALSE);		//设置
-					LCD_Dis_Char_16_16(4,7,&WordLib_CN[28][0],FALSE);		
-					
-					LCD_Dis_ASCIIStr(4,19,"HOME",TRUE);						//HOME
-		}break;
 	}
 }
 
 /********************************************************************************
  * 函数名：GUI_Operation()
- * 描述  ：显示操作界面
+ * 描述  ：显示操作界面		keyval==0xff表示是从别的界面返回的,类型一定是无符号的，
+							否则if判断总不成立，有待进一步考究
  * 输入  ：-		    	
  * 返回  ：- 进入的界面
  * 调用  ：外部调用
  ********************************************************************************/
-char GUI_Operation(char keyval)
+void GUI_Operation(uchar keyval)
 {
-	char selitem = 0;					//选择的值
-	if(g_homepage)						//如果在主界面2则先切回1
+	char selitem = 1;					//选择的值
+
+	if(keyval==0xff||g_homepage)		//如果在主界面2则先切回1
 	{
+		keyval = KEY_NONE;
 		LCD_Clear();
 		GUI_HomePage();					//默认就为0 HOME项
 	}
 	else 
 	{
+		SendByteASCII(keyval);
+		SendString("\n\r");
 		if(keyval==KEY_L) selitem++;
 		else if(keyval==KEY_R) selitem--;
-		if(selitem>2) selitem = 0;
-		else if(selitem<0) selitem = 2;
+		if(selitem>3) selitem = 1;
+		else if(selitem<1) selitem = 3;
+	
 		GUI_HomeMenu(selitem);			//在主菜单下则可以变动
 	}
 	SetSoftTimer(TIMER_1,10);			//设置退出延时定时器 10s
@@ -532,18 +529,18 @@ char GUI_Operation(char keyval)
 		{	SetSoftTimer(TIMER_1,10);
 			if(keyval==KEY_ENTER)
 			{
-				g_guilevel=1;
-				return selitem;
+				g_menumark=selitem<<12;
+				return ;
 			}
-			else if(keyval==KEY_HOME) return 0;
+			else if(keyval==KEY_HOME) {g_menumark = 0;return ;}
 			else if(keyval==KEY_L) selitem++;
 			else if(keyval==KEY_R) selitem--;
-			if(selitem>2) selitem = 0;
-			else if(selitem<0) selitem = 2;
+			if(selitem>3) selitem = 1;
+			else if(selitem<1) selitem = 3;
 			GUI_HomeMenu(selitem);				//在主菜单下则可以变动	
 		}
 
-		if(ReadSoftTimer(TIMER_1)) return 0;	//超时返回
+		if(ReadSoftTimer(TIMER_1)) {g_menumark = 0;return ;}	//超时返回
 	}
 }
 

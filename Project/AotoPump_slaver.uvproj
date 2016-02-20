@@ -433,6 +433,11 @@
               <FileType>1</FileType>
               <FilePath>..\APP\LCD_GUI.c</FilePath>
             </File>
+            <File>
+              <FileName>Menu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\Menu.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

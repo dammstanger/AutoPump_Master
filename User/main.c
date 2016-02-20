@@ -30,6 +30,7 @@
 #include "Key.h"
 #include "Time.h"
 #include "EEPROM_51.h"
+#include "Menu.h"
 /****************************宏定义***********************************************/
 #define P2_5	0x20
 #define P2_7	0x80
@@ -74,7 +75,6 @@ void T0_EXT_Init()
 void main()
 {
 	char key;
-	char setval;
 	uchar i=0;
 	delay1s();
 	AUXR = AUXR|0x40;  	// T1, 1T Mode
@@ -101,44 +101,59 @@ void main()
 	SetSoftTimer(TIMER_2,5);		//设置主界面滚动延时
 	GUI_HomePage();
 	while(1)
-	{	
-		//按键扫描----------------------------------------------
-		key = Key_Scan();
-		//处理键值-----------------------------------------------	
-		if(key!=KEY_NONE)
+	{
+		if(g_menumark==0)
 		{
-			LCD_BL_ON;
-			switch(GUI_Operation(key))
+			//按键扫描----------------------------------------------
+			key = Key_Scan();
+			//处理键值-----------------------------------------------	
+			if(key!=KEY_NONE)
 			{
-				case 1 :{
-					if(GUI_DisplayPassword())
-						setval = GUI_Setting();
-					switch(setval)
-					{
-						case 1 : GUI_ModeSetting();break;
-						case 2 :{
-						}break;
-						case 3 :{
-						}break;
-						case 4 :{
-						}break;
-						case 5 :{
-						}break;
-						case 6 :{
-						}break;
-					}
-					LCD_Clear();
-					GUI_HomePage();
+				LCD_BL_ON;
+				g_menumark = MENU_OPERATE;
+			}	
+		}
+		else
+		{
+			key = 0xff;
+		}
+		//查询并进入界面				
+		switch(g_menumark)
+		{
+			case MENU_OPERATE 	:{
+//				SendByteASCII(g_menumark>>8);
+//				SendByteASCII(key);
+//				SendString("\n\r");
+				GUI_Operation(key);
+				SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
 				}break;
-				case 2 :{
-					GUI_History();
-				}break;
-				default :{
-					;
-				}break;
-			}
-			SetSoftTimer(TIMER_2,10);		//设置主界面滚动延时
-		}			
+			case MENU_KEYINPUT 	:{GUI_DisplayPassword();}break;
+			case MENU_HISTORY :{
+				GUI_History();
+			}break;
+		}
+		//2级查询
+		switch(g_menumark)
+		{
+			case MENU_SET:{GUI_Setting();}break;
+		}
+		//3级查询
+		switch(g_menumark)
+		{
+			case MENU_MODE :{GUI_ModeSetting();}break;
+			case MENU_STARTL :{
+			}break;
+			case MENU_STOPL :{
+			}break;
+			case MENU_DATETIME :{
+			}break;
+			case MENU_KEYSET :{
+			}break;
+			case MENU_BACKLIT :{
+			}break;
+		}
+			
+
 		//确定系统状态------------------------------------------
 		g_sysflag &= ~STATUS; 
 		if(CAPWAI==1)
@@ -164,7 +179,7 @@ void main()
 				
 			}break;		
 		}//end of switch
-		if(ReadSoftTimer(TIMER_2))			//滚动时间到
+		if(ReadSoftTimer(TIMER_2)&&g_menumark==0)			//滚动时间到
 		{	LCD_BL_OFF;
 			if(g_homepage)
 			{
