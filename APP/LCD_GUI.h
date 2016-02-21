@@ -28,6 +28,8 @@
 /****************************变量声明*********************************************/
 extern uchar code Pic_arrow[];
 extern uchar code Pic_xuejie[];
+extern uchar g_keycmd;
+extern uchar s_baklit_on;
 /****************************变量定义*********************************************/
 
 /****************************函数声明*********************************************/
@@ -39,6 +41,8 @@ void GUI_ModeSetting(void);
 void GUI_SRARTLSetting(void);
 void GUI_STOPLSetting(void);
 void GUI_DATETIMESetting(void);
+void GUI_KEYSetting(void);
+void GUI_BLSetting(void);
 void GUI_History(void);
 void GUI_CaseData_Dis(char percent,char refill);
 void GUI_HomePage(void);

@@ -109,7 +109,8 @@ void main()
 			//´¦Àí¼üÖµ-----------------------------------------------	
 			if(key!=KEY_NONE)
 			{
-				LCD_BL_ON;
+				if(s_baklit_on)
+					LCD_BL_ON;
 				g_menumark = MENU_OPERATE;
 			}	
 		}
@@ -141,10 +142,8 @@ void main()
 			case MENU_STARTL :{GUI_SRARTLSetting();}break;
 			case MENU_STOPL :{GUI_STOPLSetting();}break;
 			case MENU_DATETIME :{ GUI_DATETIMESetting();}break;
-			case MENU_KEYSET :{
-			}break;
-			case MENU_BACKLIT :{
-			}break;
+			case MENU_KEYSET :{GUI_KEYSetting();}break;
+			case MENU_BLSET :{GUI_BLSetting();}break;
 		}
 			
 

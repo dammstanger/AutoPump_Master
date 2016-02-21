@@ -35,7 +35,7 @@
 #define MENU_STOPL				0x2130
 #define MENU_DATETIME			0x2140
 #define MENU_KEYSET				0x2150
-#define MENU_BACKLIT			0x2160
+#define MENU_BLSET				0x2160
 
 
 /****************************类型定义*********************************************/
