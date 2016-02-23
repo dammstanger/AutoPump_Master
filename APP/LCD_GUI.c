@@ -59,13 +59,13 @@ void GUI_BLSettingMenu(uchar wei);
 void GUI_DisplayWaterTemp()
 {	
 	//显示温度
-	LCD_Dis_Digital_float(1,22,tmp_data.tmp2);
+	LCD_Dis_Digital_float(1,22,tmp_data.tmp1);
 }
 
 
 /********************************************************************************
  * 函数名：GUI_DisplayAirTemp()
- * 描述  ：显示水温
+ * 描述  ：显示气温
  * 输入  ：-		    	
  * 返回  ：- 
  * 调用  ：内外部调用
@@ -73,7 +73,7 @@ void GUI_DisplayWaterTemp()
 void GUI_DisplayAirTemp()
 {	
 	//显示温度
-	LCD_Dis_Digital_float(4,14,tmp_data.tmp1);						//从右往左的顺序增长
+	LCD_Dis_Digital_float(4,14,tmp_data.tmp2);						//从右往左的顺序增长
 }
 
 
@@ -809,14 +809,22 @@ void GUI_HomePage()
 	g_homepage = 0;
 	LCD_Dis_Pict(1,1,45,62,Pic_Case);
 	
-	LCD_Dis_Char_16_16(1,5,&WordLib_CN[0][0],FALSE);		//实时水温
-	LCD_Dis_Char_16_16(1,6,&WordLib_CN[1][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,7,&WordLib_CN[4][0],FALSE);		//
-	LCD_Dis_Char_16_16(1,8,&WordLib_CN[2][0],FALSE);		//	
+//	LCD_Dis_Char_16_16(1,5,&WordLib_CN[0][0],FALSE);		//实时水温
+//	LCD_Dis_Char_16_16(1,6,&WordLib_CN[1][0],FALSE);		//
+//	LCD_Dis_Char_16_16(1,7,&WordLib_CN[4][0],FALSE);		//
+//	LCD_Dis_Char_16_16(1,8,&WordLib_CN[2][0],FALSE);		//	
+	LCD_Dis_Char_16_16(1,5,&WordLib_CN[6][0],FALSE);		//时间
+	LCD_Dis_Char_16_16(1,6,&WordLib_CN[7][0],FALSE);		//
+	LCD_Dis_ASCIIStr(1,13,":",FALSE);	
+//	GUI_DisplayWaterTemp();
+	LCD_Dis_Digital_int(1,16,2,RTCtime.hour,FALSE);			//时分秒
 	LCD_Dis_ASCIIStr(1,17,":",FALSE);
-	GUI_DisplayWaterTemp();
-	LCD_Dis_Char_8_16(1,23,&CharLib_SplLabel[0][0],FALSE);
-	LCD_Dis_ASCIIStr(1,24,"C",FALSE);
+	LCD_Dis_Digital_int(1,19,2,RTCtime.min,FALSE);
+	LCD_Dis_ASCIIStr(1,20,":",FALSE);
+	LCD_Dis_Digital_int(1,22,2,RTCtime.sec,FALSE);
+	
+//	LCD_Dis_Char_8_16(1,23,&CharLib_SplLabel[0][0],FALSE);
+//	LCD_Dis_ASCIIStr(1,24,"C",FALSE);
 	
 	LCD_Dis_Char_16_16(2,5,&WordLib_CN[19][0],FALSE);		//状态
 	LCD_Dis_Char_16_16(2,6,&WordLib_CN[20][0],FALSE);

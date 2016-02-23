@@ -31,6 +31,7 @@
 #include "Time.h"
 #include "EEPROM_51.h"
 #include "Menu.h"
+#include "DS18B20.h"
 /****************************宏定义***********************************************/
 #define P2_5	0x20
 #define P2_7	0x80
@@ -54,10 +55,6 @@ sbit CAPNEI	= P1^4;
 char temp;
 char dat[] = "abc";
 /****************************函数声明*********************************************/
-void SendTemp(uint temp);
-
-
-
 
 
 
@@ -86,7 +83,15 @@ void main()
 	T0_EXT_Init();	
 	SPI_Init(MASTER);
 	IIC_GPIO_Config();
-	LCD_GPIOInit();
+
+	P4SW |= 0x10;			//18B20
+	SendString("ROMID:\r\n");
+	DS18B20_Read_RomID(*RomID);
+	SendROMID(1);
+	SendString("\r\n");
+	DS18B20_ReadTemperature(1);
+	
+	LCD_GPIOInit();	
 	LCD_Init();
 	delay1s();
 	DS3231_Init();
@@ -195,7 +200,7 @@ void main()
 			else{
 				DS3231_ReadTime();
 				LCD_Clear();
-				delay100ms();
+				TemperDatHandle();
 				GUI_HomePage2();
 
 			}
@@ -204,17 +209,6 @@ void main()
 
 	}//end of while
 }
-
-void SendTemp(uint temp)
-{		
-		SendByteNum(temp/10000);			// 百位显示值
-		SendByteNum(temp/1000%10);			// 十位显示值
-		SendByteNum(temp/100%10);			// 个位显示值
-		SendOneByte('.');
-		SendByteNum(temp/10%10);			//十分位显示值
-		SendByteNum(temp%10);				//百分位显示值
-}
-
 
 void EXTI0_ISR() interrupt 0 
 {	//响应后IE0自动清除

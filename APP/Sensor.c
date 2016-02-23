@@ -24,7 +24,7 @@
 #include "Sensor.h"
 #include "LCD_GUI.h"
 #include "YXD19264D_51.h"
-
+#include "DS18B20.h"
 /****************************宏定义***********************************************/
 
 /****************************变量定义*********************************************/
@@ -40,17 +40,20 @@ TMPDAT	tmp_data={8888,8888};
  ********************************************************************************/
 void TemperDatHandle()
 {
-	tmp_data.tmp1 = (uint)sensor_data.temp1_h<<8|(uint)sensor_data.temp1_l;
+	tmp_data.tmp2 = DS18B20_ReadTemperature(1);
+	SendString("temp2:\r\n");									//调试信息时候用
+	SendTemp(tmp_data.tmp2);
+	SendString("\r\n");
+//	tmp_data.tmp1 = (uint)sensor_data.temp1_h<<8|(uint)sensor_data.temp1_l;
 //	SendString("temp1:\r\n");
 //	SendByteASCII(tmp_data.tmp1);
 //	SendString("\r\n");
-	tmp_data.tmp2 = (uint)sensor_data.temp2_h<<8|(uint)sensor_data.temp2_l;
+//	tmp_data.tmp2 = (uint)sensor_data.temp2_h<<8|(uint)sensor_data.temp2_l;
 //	SendString("temp2:\r\n");
 //	SendByteASCII(tmp_data.tmp2);
 //	SendString("\r\n");
 	if(tmp_data.tmp1>5000) tmp_data.tmp1 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
 	if(tmp_data.tmp2>5000) tmp_data.tmp2 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
-
 }
 
 /********************************************************************************

@@ -4,13 +4,13 @@
  * 文件名	：DS18B20.c
  * 描	述	：DS18B20驱动	应用于STC12C5A60S2	11.0592MHz
  *            
- * 实验平台	：自控水泵V2.0
+ * 实验平台	：自控水泵V1.0  60S2 11.0592MHz
  * 硬件连接	：
- * 版 	本	：V0.1.160128
+ * 版 	本	：V0.1.160214
  * 从属关系	：PoolAuto
  * 库版本	：无
  * 创建时间	：2016.1.28
- * 最后编辑	：2016.1.28
+ * 最后编辑	：2016.2.14
  **-------------------------------------------------------------------------------
 
  * 作	者	：Damm Stanger
@@ -28,11 +28,15 @@
 /****************************变量声明*********************************************/
 
 /****************************变量定义*********************************************/
-sbit DQ_w = P4^3;   							//定义通信端口 
+sbit DQ_w = P4^4;   							//定义通信端口 
 
 #if MULTI_SENSOR
-uchar RomID[2][8]={0x28,0xff,0x53,0xc6,0x01,0x15,0x03,0xf9};
+uchar RomID[2][8]={0x28,0x25,0x8f,0x06,0x04,0x00,0x00,0x70,		//NO1:气压计温度
+				   0x28,0xff,0x53,0xc6,0x01,0x15,0x03,0xf9};	//NO2:水池水度
+#else
+uchar RomID[1][8]={0};
 #endif
+
 uchar _00wbit[8]={2,2,2,2,2,2,2,2}; //初始化00写位组全部为填充位2
 
 
@@ -209,8 +213,9 @@ void WriteOneChar(uchar dat)
  ********************************************************************************/
 uint DS18B20_ReadTemperature(uchar NO)			
 {
-	uchar  a=0, b=0,n;
+	uchar  a=0, b=0;
 	uint  t=0;
+	uchar n;
 
 	DS18B20_Init();
 	WriteOneChar(0xCC); // 跳过读序号列号的操作
@@ -254,7 +259,7 @@ uint DS18B20_ReadTemperature(uchar NO)
  * 返回  ：-
  * 调用  ：外部
  ********************************************************************************/
-void DS18B20_Read_RomID(char *id) 
+void DS18B20_Read_RomID(uchar *id) 
 { 
 	unsigned char i; 
 	DS18B20_Init(); 
@@ -402,10 +407,16 @@ void SendROMID(unsigned char n)
 {	
 	unsigned char i,j; 
 	for(i=0;i<n;i++)
+	{
+		SendString("NO.");
+		SendByteASCII(i+1);
+		SendString(":\r\n");
 		for(j=0;j<8;j++)
 		{
 			SendByteASCII(RomID[i][j]);
 			SendOneByte(' ');
 		}
+		SendString("\r\n");
+	}	
 }
 
