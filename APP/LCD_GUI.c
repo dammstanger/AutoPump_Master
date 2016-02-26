@@ -24,6 +24,7 @@
 #include "DS3231.h"
 #include "Menu.h"
 #include "UART_51.h"
+#include "Dataopt.h"
 
 /****************************宏定义*********************************************/
 #define KS_NORMAL			0
@@ -35,9 +36,6 @@
 bit g_homepage = 0;				//主界面标记，0界面1 =1界面2
 uchar g_keycmd = 0;
 
-uchar s_needkey = 0;
-long s_keyword = 123456;
-uchar s_baklit_on = 1;
 /****************************函数声明*********************************************/
 void GUI_SettingMenu(char num, char turn);
 void GUI_HomeMenu(char selitem);
@@ -47,7 +45,7 @@ void GUI_PecentSettingMenu(uchar num,uchar wei);
 void GUI_DateTimeSettingMenu(STC_TIME dat,uchar wei);
 void GUI_KEYSettingMenu(char keyon,char wei);
 void GUI_BLSettingMenu(uchar wei);
-
+void GUI_DEFAULTSettingMenu(char yes,uchar wei);
 
 /********************************************************************************
  * 函数名：GUI_DisplayWaterTemp()
@@ -118,7 +116,7 @@ char GUI_DisplayPassword()
 	long input=0,input2=0;
 	if(g_keycmd==KS_NORMAL)
 	{
-		if(!s_needkey) {g_menumark = MENU_SET;return 0;}			//没有设置密码
+		if(!g_savedat.s_needkey) {g_menumark = MENU_SET;return 0;}			//没有设置密码
 		LCD_Clear();
 		LCD_Dis_Char_16_16(1,4,&WordLib_CN[45][0],FALSE);		//请输入密码
 		LCD_Dis_Char_16_16(1,5,&WordLib_CN[46][0],FALSE);	
@@ -166,15 +164,21 @@ char GUI_DisplayPassword()
 			GUI_PasswordMenu(selitem);
 			
 			if(keyval==KEY_ENTER)
-			{
-				if(wei-->0) 
+			{	//---------------------返回--------------------------------
+				if(selitem==10)
+				{
+					g_menumark = MENU_SET;return 0;
+				}
+				//---------------输入数字与确认与--------------------------
+				if(wei-->0) 			
 				{
 					input *=10;
 					input += selitem;
 					LCD_Dis_ASCIIStr(2,17-wei*2,"*",FALSE);
 				}
 				else{
-					if(g_keycmd==KS_KEYSET)
+					//--------------密码设置首次输入-----------------------
+					if(g_keycmd==KS_KEYSET)		
 					{
 						g_keycmd = KS_KEYSET2;
 						input2 = input;
@@ -191,10 +195,13 @@ char GUI_DisplayPassword()
 						wei = 6;
 						input = 0;
 					}
+					//--------------密码设置二次输入-----------------------
 					else if(g_keycmd==KS_KEYSET2)
 					{
 						if(input==input2)
 						{
+							g_savedat.s_keyword = input2;
+							DAT_SaveDat(S_KEY,g_savedat);
 							g_menumark = MENU_KEYSET;
 							g_keycmd = KS_KEYSET_OK;
 							return 1;
@@ -212,9 +219,10 @@ char GUI_DisplayPassword()
 							return 0;
 						}
 					}
+					//--------------正常密码输入-----------------------
 					else if(g_keycmd==KS_NORMAL)
 					{
-						if(input==s_keyword)
+						if(input==g_savedat.s_keyword)
 						{
 							g_menumark = MENU_SET;return 1;
 						}
@@ -226,7 +234,7 @@ char GUI_DisplayPassword()
 							LCD_Dis_Char_16_16(2,8,&WordLib_CN[51][0],FALSE);		
 							LCD_Dis_ASCIIStr(2,17,"!",FALSE);
 							delay1s();
-							LCD_Clear_Region(17,1,26,192);
+							LCD_Clear_Region(17,1,16,192);
 							wei = 6;
 							input = 0;
 							if(--i==0) {g_menumark = MENU_OPERATE;return 0;}
@@ -262,14 +270,14 @@ void GUI_Setting()
 			else if(keyval==KEY_UP)
 			{
 				selitem--;
-				if(selitem<1) {selitem = 6;turn = 1;}
+				if(selitem<1) {selitem = 7;turn = 1;}
 				else if(selitem==4){turn = 1;}
 				else turn = 0;
 			}
 			else if(keyval==KEY_DOWN)
 			{
 				selitem++;
-				if(selitem>6) {selitem = 1;turn = 1;}
+				if(selitem>7) {selitem = 1;turn = 1;}
 				else if(selitem==5){turn = 1;}
 				else turn = 0;
 			}	
@@ -334,8 +342,20 @@ void GUI_ModeSetting()
 					g_menumark = MENU_SET;
 					return ;
 				}
-				g_menumark = MENU_OPERATE;
-				return ;
+				else if(selitem==1) 
+				{
+					g_savedat.mode = AUTO;			//自动
+					g_menumark = MENU_SET;
+					DAT_SaveDat(S_MODE,g_savedat);
+					return ;				
+				}
+				else if(selitem==2) 
+				{
+					g_savedat.mode = MANAUL;		//手动
+					g_menumark = MENU_SET;
+					DAT_SaveDat(S_MODE,g_savedat);
+					return ;					
+				}
 			}//if(keyval==KEY_ENTER)
 		}//if(keyval!=KEY_NONE)
 	}//while(1)
@@ -406,8 +426,19 @@ void GUI_SRARTLSetting()
 					g_menumark = MENU_SET;
 					return ;
 				}
-				g_menumark = MENU_OPERATE;
-				return ;
+				else 
+				{
+					if(input>=g_savedat.s_stopl) 
+					{
+						;
+					}
+					else{
+						g_savedat.s_startl = input;			//更新抽水液位
+						g_menumark = MENU_SET;
+						DAT_SaveDat(S_STARTL,g_savedat);
+					return ;
+					}
+				}
 			}//if(keyval==KEY_ENTER)
 			GUI_PecentSettingMenu(input,wei);
 		}//if(keyval!=KEY_NONE)
@@ -476,8 +507,19 @@ void GUI_STOPLSetting()
 					g_menumark = MENU_SET;
 					return ;
 				}
-				g_menumark = MENU_OPERATE;
-				return ;
+				else 
+				{
+					if(input<=g_savedat.s_startl) 
+					{
+						;
+					}
+					else{
+						g_savedat.s_stopl = input;			//更新抽水液位
+						g_menumark = MENU_SET;
+						DAT_SaveDat(S_STOPL,g_savedat);
+					return ;
+					}
+				}
 			}//if(keyval==KEY_ENTER)
 			GUI_PecentSettingMenu(input,wei);
 		}//if(keyval!=KEY_NONE)
@@ -495,8 +537,9 @@ void GUI_STOPLSetting()
 void GUI_DATETIMESetting()
 {
 	char keyval,wei = 1;
-	STC_TIME input = {0,0,0,1,5,1,2016,0};
+	STC_TIME input;
 	
+	input = RTCtime;
 	LCD_Clear();
 	LCD_Dis_Char_16_16(1,4,&WordLib_CN[12][0],FALSE);		//时间日期
 	LCD_Dis_Char_16_16(1,5,&WordLib_CN[38][0],FALSE);		
@@ -506,8 +549,8 @@ void GUI_DATETIMESetting()
 	LCD_Dis_Char_16_16(1,9,&WordLib_CN[28][0],FALSE);
 	LCD_Dis_Digital_int(2,8,4,input.year,FALSE);
 	LCD_Dis_Char_16_16(2,5,&WordLib_CN[10][0],FALSE);				//年月日
-	LCD_Dis_Char_16_16(2,6,&WordLib_CN[11][0],FALSE);		
-	LCD_Dis_Char_16_16(2,8,&WordLib_CN[12][0],FALSE);
+	LCD_Dis_Char_16_16(2,7,&WordLib_CN[11][0],FALSE);		
+	LCD_Dis_Char_16_16(2,9,&WordLib_CN[12][0],FALSE);
 	LCD_Dis_ASCIIStr(3,7,":",FALSE);
 	LCD_Dis_ASCIIStr(3,10,":",FALSE);
 	LCD_Dis_Char_16_16(3,8,&WordLib_CN[37][0],FALSE);		
@@ -527,12 +570,12 @@ void GUI_DATETIMESetting()
 			else if(keyval==KEY_R)
 			{
 				wei++;
-				if(wei>8) wei = 0;
+				if(wei>9) wei = 0;
 			}
 			else if(keyval==KEY_L)
 			{
 				wei--;
-				if(wei<0) wei = 8;
+				if(wei<0) wei = 9;
 			}
 			else if(keyval==KEY_UP)
 			{
@@ -579,8 +622,13 @@ void GUI_DATETIMESetting()
 					g_menumark = MENU_SET;
 					return ;
 				}
-				g_menumark = MENU_OPERATE;
-				return ;
+				else if(wei==9)
+				{
+					DS3231_SetTime(input);
+					g_menumark = MENU_SET;
+					return ;				
+				}
+
 			}//if(keyval==KEY_ENTER)
 		}//if(keyval!=KEY_NONE)
 	}//while(1)
@@ -597,7 +645,8 @@ void GUI_DATETIMESetting()
 void GUI_KEYSetting()
 {
 	char keyval,wei = 1,input = 0;
-	bit keyon = 1;
+	uchar keyon = g_savedat.s_needkey;
+	
 	if(g_keycmd==KS_KEYSET_OK)
 	{
 		LCD_Clear();	
@@ -647,7 +696,9 @@ void GUI_KEYSetting()
 				}
 				else if(wei==3)
 				{
-					g_menumark = MENU_OPERATE;
+					g_savedat.s_needkey = keyon;			//密码开关值保存
+					g_menumark = MENU_SET;
+					DAT_SaveDat(S_KEYSW,g_savedat);
 					return ;
 				}
 				else if(wei==0)
@@ -715,15 +766,17 @@ void GUI_BLSetting()
 				}
 				else if(wei==1) 
 				{
-					s_baklit_on = 1;
+					g_savedat.s_baklit_on = 1;
 					g_menumark = MENU_SET;
+					DAT_SaveDat(S_BL,g_savedat);
 					LCD_BL_ON;
 					return ;
 				}
 				else if(wei==2) 
 				{
-					s_baklit_on = 0;		//关闭
+					g_savedat.s_baklit_on = 0;		//关闭
 					LCD_BL_OFF;
+					DAT_SaveDat(S_BL,g_savedat);
 					g_menumark = MENU_SET;
 					return ;
 				}
@@ -732,6 +785,71 @@ void GUI_BLSetting()
 		}//if(keyval!=KEY_NONE)
 	}//while(1)
 }
+
+
+
+/********************************************************************************
+ * 函数名：GUI_DEFAULTSetting()
+ * 描述  ：恢复出厂设置
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：外部调用
+ ********************************************************************************/
+void GUI_DEFAULTSetting()
+{
+	char keyval,wei = 1,yes = 0;
+	
+	LCD_Clear();
+	LCD_Dis_Char_16_16(1,4,&WordLib_CN[72][0],FALSE);		//恢复默认？
+	LCD_Dis_Char_16_16(1,5,&WordLib_CN[73][0],FALSE);
+	LCD_Dis_Char_16_16(1,6,&WordLib_CN[74][0],FALSE);
+	LCD_Dis_Char_16_16(1,7,&WordLib_CN[75][0],FALSE);		
+	LCD_Dis_ASCIIStr(1,15,"?",FALSE);
+	GUI_DEFAULTSettingMenu(yes,wei);
+	while(1)
+	{
+		keyval = Key_Scan();
+		if(keyval!=KEY_NONE)
+		{	
+			if(keyval==KEY_HOME) 
+			{
+				g_menumark = MENU_OPERATE;
+				return ;
+			}
+			else if(keyval==KEY_L||keyval==KEY_R)
+			{
+				if(wei==1) yes = !yes;
+			}
+			else if(keyval==KEY_UP)
+			{
+				wei--;
+				if(wei<0) wei = 2;
+			}
+			else if(keyval==KEY_DOWN)
+			{
+				wei++;
+				if(wei>2) wei = 0;
+			}
+			else if(keyval==KEY_ENTER)
+			{
+				if(wei==0)
+				{
+					g_menumark = MENU_SET;
+					return ;
+				}
+				else if(wei==2) 
+				{
+					DAT_SaveDat(S_ALL,defaultdat);
+					g_menumark = MENU_SET;
+					return ;
+				}
+			}//if(keyval==KEY_ENTER)
+			GUI_DEFAULTSettingMenu(yes,wei);
+		}//if(keyval!=KEY_NONE)
+	}//while(1)
+}
+
+
 
 /********************************************************************************
  * 函数名：GUI_History()
@@ -797,6 +915,76 @@ void GUI_Operation(uchar keyval)
 	}
 }
 
+/**************************主要是菜单显示****************************************************/
+/********************************************************************************
+ * 函数名：GUI_SysStatus()
+ * 描述  ：显示主界面状态变量
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：内外部调用
+ ********************************************************************************/
+void GUI_SysStatus(uchar sta)
+{
+	static uchar sta_last=FREE;
+	if(sta!=sta_last)
+	{
+		LCD_Clear_Region(17,113,16,64);
+		sta_last = sta;
+	}
+	switch(sta)
+	{
+		case FREE :{ 
+			LCD_Dis_Char_16_16(2,10,&WordLib_CN[21][0],FALSE);		//空闲
+			LCD_Dis_Char_16_16(2,11,&WordLib_CN[22][0],FALSE);
+		}break;
+		case WORK :{
+			LCD_Dis_Char_16_16(2,9,&WordLib_CN[52][0],FALSE);		//抽水中
+			LCD_Dis_Char_16_16(2,10,&WordLib_CN[4][0],FALSE);		//
+			LCD_Dis_Char_16_16(2,11,&WordLib_CN[86][0],FALSE);			
+		}break;
+		case OUTSIDE :{
+			LCD_Dis_Char_16_16(2,10,&WordLib_CN[84][0],FALSE);		//占线
+			LCD_Dis_Char_16_16(2,11,&WordLib_CN[85][0],FALSE);			
+		}break;
+		case SWOFF :{
+			LCD_Dis_Char_16_16(2,8,&WordLib_CN[8][0],FALSE);		//开关错误
+			LCD_Dis_Char_16_16(2,9,&WordLib_CN[9][0],FALSE);			
+			LCD_Dis_Char_16_16(2,10,&WordLib_CN[50][0],FALSE);		
+			LCD_Dis_Char_16_16(2,11,&WordLib_CN[51][0],FALSE);
+		}break;	
+		case OFFLINE :{
+			LCD_Dis_Char_16_16(2,10,&WordLib_CN[87][0],FALSE);		//离线
+			LCD_Dis_Char_16_16(2,11,&WordLib_CN[85][0],FALSE);			
+		}break;		
+	}//end of switch
+}
+
+
+/********************************************************************************
+ * 函数名：GUI_SysMode()
+ * 描述  ：显示主界面模式变量
+ * 输入  ：-		    	
+ * 返回  ：- 
+ * 调用  ：内外部调用
+ ********************************************************************************/
+void GUI_SysMode(uchar mode)
+{
+	static uchar mode_last=AUTO;
+	if(mode!=mode_last)
+	{
+		LCD_Clear_Region(33,113,16,64);
+		mode_last = mode;
+	}
+	if(mode==MANAUL)
+	{
+		LCD_Dis_Char_16_16(3,10,&WordLib_CN[36][0],FALSE);		//手动
+		LCD_Dis_Char_16_16(3,11,&WordLib_CN[14][0],FALSE);	
+	}
+	else{
+		LCD_Dis_Char_16_16(3,10,&WordLib_CN[13][0],FALSE);		//自动
+		LCD_Dis_Char_16_16(3,11,&WordLib_CN[14][0],FALSE);	
+	}
+}
 /********************************************************************************
  * 函数名：GUI_HomePage()
  * 描述  ：显示主界面常量
@@ -823,20 +1011,18 @@ void GUI_HomePage()
 	LCD_Dis_ASCIIStr(1,20,":",FALSE);
 	LCD_Dis_Digital_int(1,22,2,RTCtime.sec,FALSE);
 	
-//	LCD_Dis_Char_8_16(1,23,&CharLib_SplLabel[0][0],FALSE);
+//	LCD_Dis_Char_8_16(1,23,&CharLib_SplLabel[0][0],FALSE);	//℃
 //	LCD_Dis_ASCIIStr(1,24,"C",FALSE);
 	
 	LCD_Dis_Char_16_16(2,5,&WordLib_CN[19][0],FALSE);		//状态
 	LCD_Dis_Char_16_16(2,6,&WordLib_CN[20][0],FALSE);
 	LCD_Dis_ASCIIStr(2,13,":",FALSE);
-	LCD_Dis_Char_16_16(2,10,&WordLib_CN[21][0],FALSE);		//空闲
-	LCD_Dis_Char_16_16(2,11,&WordLib_CN[22][0],FALSE);	
+	GUI_SysStatus(g_sysflag);
 	
 	LCD_Dis_Char_16_16(3,5,&WordLib_CN[34][0],FALSE);		//模式
 	LCD_Dis_Char_16_16(3,6,&WordLib_CN[35][0],FALSE);
 	LCD_Dis_ASCIIStr(3,13,":",FALSE);
-	LCD_Dis_Char_16_16(3,10,&WordLib_CN[13][0],FALSE);		//自动
-	LCD_Dis_Char_16_16(3,11,&WordLib_CN[14][0],FALSE);	
+	GUI_SysMode(g_savedat.mode);
 
 	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
 	LCD_Dis_Char_16_16(4,3,&WordLib_CN[24][0],FALSE);		
@@ -903,7 +1089,36 @@ void GUI_HomePage2()
 }
 
 
+/********************************************************************************
+ * 函数名：GUI_HomePageUpdate()
+ * 描述  ：主页变量更新
+ * 输入  ：-selitem 项
+ * 返回  ：- 
+ * 调用  ：内部调用
+ ********************************************************************************/
+void GUI_HomePageUpdate()
+{
+	LCD_Dis_Digital_int(1,16,2,RTCtime.hour,FALSE);			//时分秒
+	LCD_Dis_Digital_int(1,19,2,RTCtime.min,FALSE);
+	LCD_Dis_Digital_int(1,22,2,RTCtime.sec,FALSE);
+	GUI_SysStatus(g_sysflag);
+	GUI_SysMode(g_savedat.mode);
 
+}
+
+/********************************************************************************
+ * 函数名：GUI_HomePage2Update()
+ * 描述  ：主页2变量更新
+ * 输入  ：-selitem 项
+ * 返回  ：- 
+ * 调用  ：内部调用
+ ********************************************************************************/
+void GUI_HomePage2Update()
+{
+	LCD_Dis_Digital_int(3,6,2,RTCtime.hour,FALSE);					//时分秒
+	LCD_Dis_Digital_int(3,9,2,RTCtime.min,FALSE);
+	LCD_Dis_Digital_int(3,12,2,RTCtime.sec,FALSE);
+}
 
 /********************************************************************************
  * 函数名：GUI_HomeMenu()
@@ -1175,6 +1390,15 @@ void GUI_DateTimeSettingMenu(STC_TIME dat,uchar wei)
 			case 6 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[44][0],FALSE);break;		
 			case 7 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[33][0],FALSE);break;		
 		}
+	if(wei==9)		
+	{
+		LCD_Dis_Char_16_16(4,2,&WordLib_CN[64][0],TRUE);		//保存
+		LCD_Dis_Char_16_16(4,3,&WordLib_CN[65][0],TRUE);		
+	}
+	else {
+		LCD_Dis_Char_16_16(4,2,&WordLib_CN[64][0],FALSE);		
+		LCD_Dis_Char_16_16(4,3,&WordLib_CN[65][0],FALSE);		
+	}
 	if(wei==0)		
 	{
 		LCD_Dis_Char_16_16(4,10,&WordLib_CN[29][0],TRUE);		//返回
@@ -1184,9 +1408,9 @@ void GUI_DateTimeSettingMenu(STC_TIME dat,uchar wei)
 		LCD_Dis_Char_16_16(4,10,&WordLib_CN[29][0],FALSE);		
 		LCD_Dis_Char_16_16(4,11,&WordLib_CN[30][0],FALSE);		
 	}
+	
 
 }
-
 
 /********************************************************************************
  * 函数名：GUI_KEYSettingMenu()
@@ -1261,6 +1485,64 @@ void GUI_KEYSettingMenu(char keyon,char wei)
 }
 
 /********************************************************************************
+ * 函数名：GUI_DEFAULTSettingMenu()
+ * 描述  ：恢复出厂设置选项
+ * 输入  ：-
+ * 返回  ：- 
+ * 调用  ：内部调用
+ ********************************************************************************/
+void GUI_DEFAULTSettingMenu(char yes,uchar wei)
+{
+	if(wei==1)
+		if(yes)
+		{
+			LCD_Dis_Char_16_16(2,6,&WordLib_CN[76][0],TRUE);		//是否
+			LCD_Dis_Char_16_16(2,7,&WordLib_CN[77][0],FALSE);	
+		}
+		else{
+			LCD_Dis_Char_16_16(2,6,&WordLib_CN[76][0],FALSE);		
+			LCD_Dis_Char_16_16(2,7,&WordLib_CN[77][0],TRUE);		
+		}	
+	else{
+			LCD_Dis_Char_16_16(2,6,&WordLib_CN[76][0],FALSE);		
+			LCD_Dis_Char_16_16(2,7,&WordLib_CN[77][0],FALSE);	
+		if(yes)
+		{
+
+			LCD_fill_Region(17,81,16,1);
+			LCD_fill_Region(17,81,1,16);
+			LCD_fill_Region(17,97,16,1);
+			LCD_fill_Region(32,81,1,16);
+		}
+		else{
+			LCD_fill_Region(17,97,16,1);
+			LCD_fill_Region(17,97,1,16);
+			LCD_fill_Region(17,112,16,1);
+			LCD_fill_Region(32,97,1,16);			
+		}	
+	}
+	if(wei==2)		
+	{
+		LCD_Dis_Char_16_16(4,2,&WordLib_CN[78][0],TRUE);		//确定
+		LCD_Dis_Char_16_16(4,3,&WordLib_CN[79][0],TRUE);		
+	}
+	else {
+		LCD_Dis_Char_16_16(4,2,&WordLib_CN[78][0],FALSE);		
+		LCD_Dis_Char_16_16(4,3,&WordLib_CN[79][0],FALSE);		
+	}
+	if(wei==0)		
+	{
+		LCD_Dis_Char_16_16(4,10,&WordLib_CN[29][0],TRUE);		//返回
+		LCD_Dis_Char_16_16(4,11,&WordLib_CN[30][0],TRUE);		
+	}
+	else {
+		LCD_Dis_Char_16_16(4,10,&WordLib_CN[29][0],FALSE);		
+		LCD_Dis_Char_16_16(4,11,&WordLib_CN[30][0],FALSE);		
+	}
+	
+}
+
+/********************************************************************************
  * 函数名：GUI_SettingMenu()
  * 描述  ：设置菜单选项
  * 输入  ：-num= 项
@@ -1284,7 +1566,7 @@ void GUI_SettingMenu(char num, char turn)
 		else{
 			LCD_Dis_ASCIIStr(1,1,"1",FALSE);	
 			LCD_Dis_ASCIIStr(1,2,".",FALSE);
-			LCD_Dis_Char_16_16(1,2,&WordLib_CN[34][0],FALSE);		//模式设置
+			LCD_Dis_Char_16_16(1,2,&WordLib_CN[34][0],FALSE);		
 			LCD_Dis_Char_16_16(1,3,&WordLib_CN[35][0],FALSE);		
 			LCD_Dis_Char_16_16(1,4,&WordLib_CN[27][0],FALSE);		
 			LCD_Dis_Char_16_16(1,5,&WordLib_CN[28][0],FALSE);		
@@ -1305,7 +1587,7 @@ void GUI_SettingMenu(char num, char turn)
 		else{
 			LCD_Dis_ASCIIStr(2,1,"2",FALSE);	
 			LCD_Dis_ASCIIStr(2,2,".",FALSE);
-			LCD_Dis_Char_16_16(2,2,&WordLib_CN[13][0],FALSE);		//自动抽水液位设置
+			LCD_Dis_Char_16_16(2,2,&WordLib_CN[13][0],FALSE);		
 			LCD_Dis_Char_16_16(2,3,&WordLib_CN[14][0],FALSE);		
 			LCD_Dis_Char_16_16(2,4,&WordLib_CN[52][0],FALSE);		
 			LCD_Dis_Char_16_16(2,5,&WordLib_CN[4][0],FALSE);		
@@ -1330,7 +1612,7 @@ void GUI_SettingMenu(char num, char turn)
 		else{
 			LCD_Dis_ASCIIStr(3,1,"3",FALSE);	
 			LCD_Dis_ASCIIStr(3,2,".",FALSE);
-			LCD_Dis_Char_16_16(3,2,&WordLib_CN[13][0],FALSE);		//自动停水液位设置
+			LCD_Dis_Char_16_16(3,2,&WordLib_CN[13][0],FALSE);		
 			LCD_Dis_Char_16_16(3,3,&WordLib_CN[14][0],FALSE);		
 			LCD_Dis_Char_16_16(3,4,&WordLib_CN[56][0],FALSE);		
 			LCD_Dis_Char_16_16(3,5,&WordLib_CN[4][0],FALSE);		
@@ -1353,7 +1635,7 @@ void GUI_SettingMenu(char num, char turn)
 		else{
 			LCD_Dis_ASCIIStr(4,1,"4",FALSE);	
 			LCD_Dis_ASCIIStr(4,2,".",FALSE);
-			LCD_Dis_Char_16_16(4,2,&WordLib_CN[12][0],FALSE);		//时间日期
+			LCD_Dis_Char_16_16(4,2,&WordLib_CN[12][0],FALSE);		
 			LCD_Dis_Char_16_16(4,3,&WordLib_CN[38][0],FALSE);		
 			LCD_Dis_Char_16_16(4,4,&WordLib_CN[6][0],FALSE);		
 			LCD_Dis_Char_16_16(4,5,&WordLib_CN[7][0],FALSE);		
@@ -1374,7 +1656,7 @@ void GUI_SettingMenu(char num, char turn)
 		else{
 			LCD_Dis_ASCIIStr(1,1,"5",FALSE);	
 			LCD_Dis_ASCIIStr(1,2,".",FALSE);
-			LCD_Dis_Char_16_16(1,2,&WordLib_CN[48][0],FALSE);		//密码设置
+			LCD_Dis_Char_16_16(1,2,&WordLib_CN[48][0],FALSE);		
 			LCD_Dis_Char_16_16(1,3,&WordLib_CN[49][0],FALSE);		
 			LCD_Dis_Char_16_16(1,4,&WordLib_CN[27][0],FALSE);		
 			LCD_Dis_Char_16_16(1,5,&WordLib_CN[28][0],FALSE);		
@@ -1391,10 +1673,27 @@ void GUI_SettingMenu(char num, char turn)
 		else{
 			LCD_Dis_ASCIIStr(2,1,"6",FALSE);	
 			LCD_Dis_ASCIIStr(2,2,".",FALSE);
-			LCD_Dis_Char_16_16(2,2,&WordLib_CN[57][0],FALSE);		//背光设置
+			LCD_Dis_Char_16_16(2,2,&WordLib_CN[57][0],FALSE);		
 			LCD_Dis_Char_16_16(2,3,&WordLib_CN[58][0],FALSE);		
 			LCD_Dis_Char_16_16(2,4,&WordLib_CN[27][0],FALSE);		
 			LCD_Dis_Char_16_16(2,5,&WordLib_CN[28][0],FALSE);		
+		}
+		if(num==7)
+		{
+			LCD_Dis_ASCIIStr(3,1,"7",TRUE);	
+			LCD_Dis_ASCIIStr(3,2,".",TRUE);
+			LCD_Dis_Char_16_16(3,2,&WordLib_CN[72][0],TRUE);		//恢复默认
+			LCD_Dis_Char_16_16(3,3,&WordLib_CN[73][0],TRUE);		
+			LCD_Dis_Char_16_16(3,4,&WordLib_CN[74][0],TRUE);		
+			LCD_Dis_Char_16_16(3,5,&WordLib_CN[75][0],TRUE);			
+		}
+		else{
+			LCD_Dis_ASCIIStr(3,1,"7",FALSE);	
+			LCD_Dis_ASCIIStr(3,2,".",FALSE);
+			LCD_Dis_Char_16_16(3,2,&WordLib_CN[72][0],FALSE);		
+			LCD_Dis_Char_16_16(3,3,&WordLib_CN[73][0],FALSE);		
+			LCD_Dis_Char_16_16(3,4,&WordLib_CN[74][0],FALSE);		
+			LCD_Dis_Char_16_16(3,5,&WordLib_CN[75][0],FALSE);		
 		}
 	}
 }

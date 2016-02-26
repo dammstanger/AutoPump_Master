@@ -22,7 +22,16 @@
 
 #include "globaldefine.h"
 
-
+/****************************宏定义***********************************************/
+//possw
+#define PEC100		0x10
+#define PEC50		0x08
+#define PEC25		0x04
+#define PEC0		0x01
+#define FULL		0x20		//满了
+//flow
+#define HAS_FLOW	0x00		//有水出
+#define NO_FLOW		0x01		//没水出
 /****************************类型定义***********************************************/
 typedef struct{
 	uint tmp1;
@@ -33,6 +42,7 @@ extern TMPDAT tmp_data;
 
 void TemperDatHandle(void);
 void PressDatHandle(void);
+void LevelDatHandle(void);
 
 #endif
 

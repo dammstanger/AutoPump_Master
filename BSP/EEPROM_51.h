@@ -25,11 +25,14 @@
 #define EEPROM_SECT1	0x0000
 #define EEPROM_SECT2	0x0200
 
+#define SECTOR_1		0x01
+#define SECTOR_2		0x02
+#define SECTOR_ALL		0x03
 
 uchar IAP_ReadByte(uint addr);
 void IAP_WriteByte(uint addr,uchar dat);
 void IAP_EraseSector(uint addr);
-void IAP_EEPROMCheck(void);
+uchar IAP_EEPROMCheck(uchar sector);
 
 	 
 #endif

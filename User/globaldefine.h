@@ -25,19 +25,23 @@
 /****************************宏定义***********************************************/
 #define uchar	unsigned char 
 #define uint	unsigned int
-
+//
 #define MANAUL		0x00
 #define AUTO		0x01
+
+#define ON			0x00
+#define OFF			0x01
 //----------------------
-#define STATUS		0x0e
+#define WORK		0x80
 #define FREE		0x00
-#define WORK_SELF	0x02
-#define WORK_OUT	0x04
-#define SWOFF		0x06
+
+#define STATUS		0x0f
+#define OUTSIDE		0x01
+#define SWOFF		0x02
+#define OFFLINE		0x04
 
 /****************************类型定义***********************************************/
 typedef enum {FALSE = 0, TRUE = !FALSE} bool;
-
 /****************************变量定义*********************************************/
 sbit LED1 = P2^6;
 sbit LED2 = P5^1;

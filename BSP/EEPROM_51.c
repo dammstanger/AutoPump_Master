@@ -131,30 +131,34 @@ void IAP_EraseSector(uint addr)
  * ·µ»Ø  £º
  * µ÷ÓÃ  £º-
  ********************************************************************************/
-void IAP_EEPROMCheck()
+uchar IAP_EEPROMCheck(uchar sector)
 {
-	uint i,err=0;
-	do{
+	uint i,reval=0;
+	if(sector&0x01)
+	{
 		for(i=0;i<512;i++)
 		{
 			if(IAP_ReadByte(EEPROM_SECT1+i)!=0xff)
 			{
-				SendString("EEPROM sector1 has data.\r\n");		
-				err = 1;
+				SendString("EEPROM sector1 has data.\r\n");	
+				reval = 1;
+				break;
 			}
-		}
-	}while(err);
-	SendString("EEPROM sector1 is clean.\r\n");			
-	do{
+		}	
+	}
+	if(sector&0x02)
+	{
 		for(i=0;i<512;i++)
 		{
 			if(IAP_ReadByte(EEPROM_SECT2+i)!=0xff)
 			{
-				SendString("EEPROM sector2 hae data.\r\n");		
-				err = 1;
+				SendString("EEPROM sector2 has data.\r\n");	
+				reval |= 2;
+				break;
 			}
-		}
-	}while(err);
-	SendString("EEPROM sector2 is clean.\r\n");		
+		}		
+	}
+	if(reval==0) SendString("room is clean.\r\n");		
+	return reval;
 }
 /******************* (C) COPYRIGHT 2016 DammStanger *****END OF FILE************/

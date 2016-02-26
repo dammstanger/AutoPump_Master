@@ -28,7 +28,7 @@
 /****************************宏定义***********************************************/
 
 /****************************变量定义*********************************************/
-PAG_DATA sensor_data={'a','a','b','b','c','c',};
+PAG_DATA sensor_data={0,0,0,0,0x02,0x44,0x01,0xff,};
 TMPDAT	tmp_data={8888,8888};
 
 /********************************************************************************
@@ -52,7 +52,7 @@ void TemperDatHandle()
 //	SendString("temp2:\r\n");
 //	SendByteASCII(tmp_data.tmp2);
 //	SendString("\r\n");
-	if(tmp_data.tmp1>5000) tmp_data.tmp1 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
+//	if(tmp_data.tmp1>5000) tmp_data.tmp1 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
 	if(tmp_data.tmp2>5000) tmp_data.tmp2 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
 }
 
@@ -82,6 +82,23 @@ void PressDatHandle()
 //	SendString("\r\n");
 }	
 
+
+/********************************************************************************
+ * 函数名：LevelDatHandle()
+ * 描述  ：液位数据处理
+ * 输入  ：-
+ * 返回  ：-
+ * 调用  ：-
+ ********************************************************************************/
+void LevelDatHandle()
+{
+	SendString("possw data:\r\n");			
+	SendByteASCII(sensor_data.possw);
+	SendString("\r\n");			
+	SendString("flow data:\r\n");			
+	SendByteASCII(sensor_data.flow);
+	SendString("\r\n");	
+}
 
 /********************************************************************************
  * 函数名：SPI_ISR()

@@ -215,8 +215,9 @@ uint DS18B20_ReadTemperature(uchar NO)
 {
 	uchar  a=0, b=0;
 	uint  t=0;
+#if MULTI_SENSOR
 	uchar n;
-
+#endif
 	DS18B20_Init();
 	WriteOneChar(0xCC); // 跳过读序号列号的操作
 	WriteOneChar(0x44); // 启动温度转换
@@ -321,7 +322,7 @@ char DS18B20_SearchRomID()
 				WriteOneBit(1);
 			} 
 			else 
-			{ 	LED1=0;
+			{ 	
 				if(_00wbit[c]==2) 				//出现新00写位 
 				{ 
 					WriteOneBit(0); 

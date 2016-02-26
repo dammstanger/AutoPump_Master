@@ -443,6 +443,11 @@
               <FileType>1</FileType>
               <FilePath>..\APP\Menu.c</FilePath>
             </File>
+            <File>
+              <FileName>Dataopt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\APP\Dataopt.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
