@@ -30,7 +30,7 @@
 /****************************变量定义*********************************************/
 PAG_DATA sensor_data={0,0,0,0,0x02,0x44,0x01,0xff,};
 TMPDAT	tmp_data={8888,8888};
-
+char g_level_per=50;
 /********************************************************************************
  * 函数名：TemperDatHandle()
  * 描述  ：温度数据处理
@@ -41,9 +41,9 @@ TMPDAT	tmp_data={8888,8888};
 void TemperDatHandle()
 {
 	tmp_data.tmp2 = DS18B20_ReadTemperature(1);
-	SendString("temp2:\r\n");									//调试信息时候用
-	SendTemp(tmp_data.tmp2);
-	SendString("\r\n");
+//	SendString("temp2:\r\n");									//调试信息时候用
+//	SendTemp(tmp_data.tmp2);
+//	SendString("\r\n");
 //	tmp_data.tmp1 = (uint)sensor_data.temp1_h<<8|(uint)sensor_data.temp1_l;
 //	SendString("temp1:\r\n");
 //	SendByteASCII(tmp_data.tmp1);
@@ -63,23 +63,16 @@ void TemperDatHandle()
  * 返回  ：-
  * 调用  ：-
  ********************************************************************************/
-void PressDatHandle()
+uint PressDatHandle()
 {
 	uint press = (uint)sensor_data.press_h<<8|(uint)sensor_data.press_l;
-	uint max=0,min=0;
-	
-	press = press*100/(max-min);
-	
-//	if(FREE==(g_sysflag&STATUS)) GUI_CaseData_Dis(press,1);
-//	else GUI_CaseData_Dis(press,0);
-	
+
 	SendString("ADC data:\r\n");			
 	SendByteASCII(sensor_data.press_h);
 	SendByteASCII(sensor_data.press_l);
 	SendString("\r\n");	
-//	SendString("POS data:\r\n");			
-//	SendByteASCII(sensor_data.possw);
-//	SendString("\r\n");
+	
+	return press;
 }	
 
 
@@ -92,6 +85,22 @@ void PressDatHandle()
  ********************************************************************************/
 void LevelDatHandle()
 {
+	uint max=611,min=532,press;
+	float k,b;
+	
+	press = PressDatHandle();
+	k = -100.0/(max-min);
+	b = -(k*max);
+	g_level_per = (char)(k*press + b);
+	
+	if((sensor_data.possw&PEC100)==0)
+	g_level_per =100;
+	else if((sensor_data.possw&PEC0)==0)
+	g_level_per =0;
+	
+	if(g_level_per<0) g_level_per = 0;
+	if(g_level_per>100) g_level_per = 100;
+	
 	SendString("possw data:\r\n");			
 	SendByteASCII(sensor_data.possw);
 	SendString("\r\n");			

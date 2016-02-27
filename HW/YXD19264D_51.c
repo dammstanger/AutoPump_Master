@@ -20,6 +20,7 @@
 #include "YXD19264D_51.h"
 #include <intrins.h>
 #include "UART_51.h"
+#include "Time.h"
 /****************************宏定义***********************************************/
 
 /****************************变量声明*********************************************/
@@ -119,7 +120,7 @@ void LCD_BUSYCHECK(uchar unit)
 {
 	uchar retval;
 	do{
-//		SendString("busy check...\r\n");	
+		SendString("busy check...\r\n");	
 		retval=0;									//在多次循环中需要重新赋值
 		if(unit&LCD_U1)
 			retval|=LCD_Read(LCD_U1,LCD_Write_Con_Cmd);
@@ -127,6 +128,7 @@ void LCD_BUSYCHECK(uchar unit)
 			retval|=LCD_Read(LCD_U2,LCD_Write_Con_Cmd);
 		if(unit&LCD_U3)
 			retval|=LCD_Read(LCD_U3,LCD_Write_Con_Cmd);
+		delay100ms();
 	}while(retval&0x80);
 }
 /****************************************************************************
@@ -227,7 +229,6 @@ void LCD_Dis_Char_16_16(uchar row,uchar col,uchar *dat, bool invert)
 	else if(temp==2)	unit_en = LCD_U3;
 	col = ((col-1)%4)*16;										//计算出起始的行和列及所在区域的控制器
 	
-	LCD_BUSYCHECK(LCD_UALL);
 	LCD_Write(unit_en,LCD_Write_Con_Cmd,SET_STCOL_BASE|col);
 	LCD_Write(unit_en,LCD_Write_Con_Cmd,SET_STRPAG_BASE|row);	//设定实际的行和列
 	for(j=0;j<16;j++)

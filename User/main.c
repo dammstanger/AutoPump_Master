@@ -46,6 +46,7 @@ char g_sysflag = 0;		//	工作指示	保留	保留	保留	|		状态			|		0000 0000
 bit g_timeoverflg=0;	//抽水超时标志位
 bit g_offlineflag=0;	//离线标志位
 bit g_1stimer_1 = 0;
+bit g_1stimer_2 = 0;
 bit g_timer_flow_start = 0;
 //---------------------------------------------
 sbit START 	= P2^7;
@@ -58,12 +59,14 @@ sbit CAPNEI	= P1^4;				//内部检测
 char temp;
 char dat[] = "abc";
 
-#define PUMP_ON 	START = 0;delay200ms();START = 1
-#define PUMP_OFF 	STOP = 0;delay200ms();STOP = 1
+//关水时延时保证断电检测可靠
+#define PUMP_ON 	START = 0;delay200ms();START = 1;delay1s();delay1s()
+#define PUMP_OFF 	STOP = 0;delay200ms();STOP = 1;delay1s()
 
 /****************************函数声明*********************************************/
 void DataAqurie();
-
+char GUIMenu();
+void SystemStatus(char key);
 
 void EXTI0_Init()
 {
@@ -79,7 +82,7 @@ void T0_EXT_Init()
 
 void main()
 {
-	char key;
+	uchar key=0;
 	uchar i=0;
 	delay1s();
 
@@ -121,112 +124,38 @@ void main()
 	
 	while(1)
 	{
-		if(g_menumark==0)
-		{
-			//按键扫描----------------------------------------------
-			key = Key_Scan();
-			//处理键值-----------------------------------------------	
-			if(key!=KEY_NONE)
-			{
-				if(g_savedat.s_baklit_on)
-					LCD_BL_ON;
-				g_menumark = MENU_OPERATE;
-			}	
-		}
-		else
-		{
-			key = 0xff;
-		}
-		//查询并进入界面				
-		switch(g_menumark)
-		{
-			case MENU_OPERATE 	:{
-				GUI_Operation(key);
-				SetSoftTimer(TIMER_2,5);		//设置主界面滚动延时
-				}break;
-			case MENU_KEYINPUT 	:{GUI_DisplayPassword();}break;
-			case MENU_HISTORY :{
-				GUI_History();
-			}break;
-		}
-		//2级查询
-		switch(g_menumark)
-		{
-			case MENU_SET:{GUI_Setting();}break;
-		}
-		//3级查询
-		switch(g_menumark)
-		{
-			case MENU_MODE :{GUI_ModeSetting();}break;
-			case MENU_STARTL :{GUI_SRARTLSetting();}break;
-			case MENU_STOPL :{GUI_STOPLSetting();}break;
-			case MENU_DATETIME :{ GUI_DATETIMESetting();}break;
-			case MENU_KEYSET :{GUI_KEYSetting();}break;
-			case MENU_BLSET :{GUI_BLSetting();}break;
-			case MENU_DEFSET :{GUI_DEFAULTSetting();}break;
-		}
-		
-		//确定系统状态------------------------------------------
-		if(CAPNEI==1)
-		{
-			g_sysflag |= FREE;						//空闲
-			
-		}
-		else
-		{
-			g_sysflag |= WORK;						//工作
-			g_timeoverflg = 0;
-		}
-		//-------------------------
-		if(g_sysflag&WORK&&sensor_data.flow==NO_FLOW&&g_timeoverflg==0)
-		{
-			if(g_timer_flow_start==0)
-			{
-				g_timer_flow_start = 1;
-				SetSoftTimer(TIMER_4,10);				//设置上水延时30s
-			}
-			else
-			{
-				if(ReadSoftTimer(TIMER_2))
-				{
-					g_timer_flow_start = 0;
-					g_timeoverflg = 1;
-				}
-			}		
-		}
-		else{
-			g_timer_flow_start = 0;
-		}
-		//-------------------------
-		if(g_offlineflag)							//首先判断是否离线
-			g_sysflag |= OFFLINE;
-		else if((sensor_data.flow==NO_FLOW)&&g_timeoverflg==1)	//水通在别家
-			g_sysflag |= SWOFF;
-		else if(CAPWAI==0&&CAPNEI==1)				//别家抽水
-			g_sysflag |= OUTSIDE;
-		
-
+		key = GUIMenu();					//菜单设置
+		SystemStatus(key);				//系统状态确认
 		
 		//执行器更新---------------------------------------------------------------
-		if(g_savedat.mode==AUTO)
+		if((g_savedat.mode==AUTO)&&(g_sysflag&OFFLINE)==0)
 		{	//
-			if(g_sysflag&WORK&&(g_sysflag&STATUS||								//在工作过程中遇到问题
-				(sensor_data.possw&FULL)==0||(sensor_data.possw&PEC100)==0)) 	//水满时
-			{PUMP_OFF;}									//关水
-			else if(g_sysflag==FREE&&(sensor_data.possw&PEC0)==0) 					//没水时
+			if(g_sysflag&WORK&&(g_sysflag&STATUS||								//在工作过程中遇到问题,
+			(sensor_data.possw&FULL)==0||(sensor_data.possw&PEC100)==0||g_level_per>=94))//水满时
+			{	
+				PUMP_OFF;
+			}									
+			else if(g_sysflag==FREE&&(g_sysflag&SLEEP==0)&&((sensor_data.possw&PEC0)==0||g_level_per<=5)) 		//没水时
 			{
 				PUMP_ON;
 			}
-			
 		}
 		
 		//界面更新-------------------------------------------------------
 		if(ReadSoftTimer(TIMER_2))
-		{//--------------工作状态----------------------------------------
-			if(g_sysflag&WORK)
+		{	
+			//--------------工作状态----------------------------------------
+			if(g_sysflag&WORK||g_sysflag&STATUS)
 			{
 				DataAqurie();
-				if(g_sysflag&OUTSIDE)
+				
+				if(g_sysflag&OFFLINE)
+				{
+					ALARM = ON;
+					delay100ms();
+					ALARM = OFF;
+				}
+				else if(g_sysflag&OUTSIDE)
 				{
 					ALARM = ON;
 					delay200ms();
@@ -242,46 +171,182 @@ void main()
 					delay200ms();
 					ALARM = OFF;
 				}
-				else if(g_sysflag&OFFLINE)
-				{
-					 delay200ms();
-				}
 				else delay200ms();
 				
-				if(g_homepage) LCD_Clear();				//如果在别的页面则返回主页1
-				
-				GUI_HomePage();
-				SetSoftTimer(TIMER_2,5);				//设置延时
+				if(g_menumark==0)
+				{
+					LCD_BL_OFF;
+					if(g_homepage) 
+					{
+						LCD_Clear();				//如果在别的页面则返回主页1
+						GUI_HomePage();
+					}
+					else
+					{
+						GUI_CaseData_Dis(g_level_per,0);		//更新液位，不用太频繁
+					}
+					SetSoftTimer(TIMER_2,5);				//设置延时
+				}
 			}
 			else{//--------------空闲状态----------------------------------------
-				LCD_BL_OFF;
-				if(g_homepage)
+				if(g_menumark==0)
 				{
-					DataAqurie();
-					
-					LCD_Clear();
-					delay100ms();
-					delay100ms();
-					GUI_HomePage();
+					LCD_BL_OFF;
+					if(g_homepage)
+					{
+						DataAqurie();
+						
+						LCD_Clear();
+						delay100ms();
+						delay100ms();
+						GUI_HomePage();
+					}
+					else{
+						LCD_Clear();
+						GUI_HomePage2();
+					}
+					SetSoftTimer(TIMER_2,10);				//设置主界面滚动延时
 				}
-				else{
-					LCD_Clear();
-					GUI_HomePage2();
-				}
-				SetSoftTimer(TIMER_2,8);				//设置主界面滚动延时
 			}
 		}	
 		//-----------------------主界面数据更新---------------------------------		
-		if(g_1stimer_1&&(g_menumark==0||g_menumark==MENU_OPERATE))
+		if(g_1stimer_1&&g_menumark==0)
 		{
 			g_1stimer_1 = 0;
 			if(g_homepage==0)
 				GUI_HomePageUpdate();
 			else
 				GUI_HomePage2Update();
+			
 		}
-		
+//		if(g_1stimer_2)
+//		{
+//			g_1stimer_2 = 0;
+//			SendByteASCII(Timer_reg);
+//			SendOneByte('-');
+//			SendByteASCII(Timer2_cnt);
+//			SendOneByte('-');
+//			SendByteASCII(g_sysflag);
+//			SendString("\r\n");	
+////			SendByteASCII(sensor_data.possw&PEC0);
+//		}
 	}//end of while
+}
+
+
+char GUIMenu()
+{
+	char key;
+	if(g_menumark==0)
+	{
+		//按键扫描----------------------------------------------
+		key = Key_Scan();
+		//处理键值-----------------------------------------------	
+		if(key!=KEY_NONE)
+		{
+			if(g_sysflag&SWOFF) return key;
+			
+			if(g_savedat.s_baklit_on)
+				LCD_BL_ON;
+			g_menumark = MENU_OPERATE;
+		}	
+	}
+	else
+	{
+		key = 0xff;
+	}
+	//查询并进入界面				
+	switch(g_menumark)
+	{
+		case MENU_OPERATE 	:{
+			GUI_Operation(key);
+			SetSoftTimer(TIMER_2,5);		//设置主界面滚动延时
+			}break;
+		case MENU_KEYINPUT 	:{GUI_DisplayPassword();}break;
+		case MENU_HISTORY :{
+			GUI_History();
+		}break;
+	}
+	//2级查询
+	switch(g_menumark)
+	{
+		case MENU_SET:{GUI_Setting();}break;
+	}
+	//3级查询
+	switch(g_menumark)
+	{
+		case MENU_MODE :{GUI_ModeSetting();}break;
+		case MENU_STARTL :{GUI_SRARTLSetting();}break;
+		case MENU_STOPL :{GUI_STOPLSetting();}break;
+		case MENU_DATETIME :{ GUI_DATETIMESetting();}break;
+		case MENU_KEYSET :{GUI_KEYSetting();}break;
+		case MENU_BLSET :{GUI_BLSetting();}break;
+		case MENU_DEFSET :{GUI_DEFAULTSetting();}break;
+	}
+	return key;
+}
+
+
+
+void SystemStatus(char key)
+{
+	//确定系统状态------------------------------------------
+	if(CAPNEI==1)
+		g_sysflag &= ~WORK;						//空闲
+	else
+		g_sysflag |= WORK;						//工作
+	//工作与空闲都需要判断的状态-------------------------
+	if(g_offlineflag)							//首先判断是否离线
+		g_sysflag |= OFFLINE;
+	else g_sysflag &= ~OFFLINE;					//
+	if(CAPWAI==0&&CAPNEI==1)					//别家抽水
+		g_sysflag |= OUTSIDE;
+	else g_sysflag &= ~OUTSIDE;					//
+	
+
+	if(g_sysflag&WORK)//-------------工作-------------------------------
+	{
+		g_sysflag &= ~SWOFF;
+		g_sysflag &= ~SLEEP;
+		if(sensor_data.flow==NO_FLOW&&g_timeoverflg==0)	//如果没水出则开始计时
+		{
+			if(g_timer_flow_start==0)
+			{
+				g_timer_flow_start = 1;
+				SetSoftTimer(TIMER_4,30);				//设置上水延时30s
+			}
+			else
+			{
+				if(ReadSoftTimer(TIMER_4))
+				{
+					g_timer_flow_start = 0;
+					g_timeoverflg = 1;
+				}
+			}
+		}
+		else if(sensor_data.flow==HAS_FLOW)
+		{
+			g_timer_flow_start = 0;						//复位计时
+			g_timeoverflg = 0;							//复位超时标记
+		}
+		else if(g_timeoverflg==1)
+		{
+			g_sysflag |= SWOFF;							//超时切换状态
+		}
+	}//-----------------------------空闲-------------------------------------
+	else {
+		g_timer_flow_start = 0;						//复位计时
+		g_timeoverflg = 0;							//复位超时标记
+		
+		//s空闲时手动情况下清除SWOFF错误
+		if((g_sysflag&SWOFF)&&(g_savedat.mode==MANAUL||key==KEY_HOME))	
+			g_sysflag &=~SWOFF;
+		
+		if(RTCtime.hour>=22||RTCtime.hour<=6)		//晚间进入睡眠状态
+		g_sysflag |= SLEEP;
+		else g_sysflag &= ~SLEEP;
+	}
+	
 }
 
 
@@ -289,6 +354,7 @@ void main()
 
 void DataAqurie()
 {
+	static uchar offlinecnt = 0;
 	//发送采集数据指令
 	DATA_Cmd_Pkg_Send();
 	SetSoftTimer(TIMER_3,5);			//设置发送超时
@@ -299,20 +365,25 @@ void DataAqurie()
 	if(Trans_RevPakFin)					//收到数据
 	{
 		Trans_RevPakFin = 0;
-		g_offlineflag = 0;				
+		g_offlineflag = 0;				//离线标记清零
+		offlinecnt = 0;					//离线计数清零
 		if(2==Pak_Handle())
 		{
 			SendString("valid data received.\r\n");		
 			LED2=0;
 			delay100ms();
-			LED2= 1;
-			PressDatHandle();				
+			LED2= 1;		
 			TemperDatHandle();
 			LevelDatHandle();
 		}
 	}
 	else{								//接收超时
-		g_offlineflag = 1;
+		offlinecnt++;
+		if(++offlinecnt==5)				//3次超时判断为离线
+		{
+			g_offlineflag = 1;
+			offlinecnt = 0;
+		}
 		LED1 = 0;						//红灯闪
 		delay100ms();
 		LED1 = 1;
@@ -329,9 +400,11 @@ void EXTI0_ISR() interrupt 0
 void T0_EXT_ISR() interrupt 1
 {	//响应后IE1自动清除
 	g_1stimer_1 = 1;
+	g_1stimer_2 = 1;
 	SoftTimer();
 	DS3231_ReadTime();
-//	SendByteASCII(sensor_data.possw);
+
+
 }
 
 /******************* (C) COPYRIGHT 2016 DammStanger *****END OF FILE************/

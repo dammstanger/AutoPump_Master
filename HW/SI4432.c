@@ -246,7 +246,7 @@ void SI4432_SetRxMode(void)
 	/*enable receiver chain*/
 	SI4432_WriteReg(0x07, 0x05);
 	
-	SendString("SI4432_Set RxMode......\r\n");
+//	SendString("SI4432_Set RxMode......\r\n");
 }
 
 //------------------------------------------------------------------------------------------------
@@ -271,7 +271,7 @@ void SI4432_SetTxMode(void)
 	//The radio forms the packet and send it automatically.
 	SI4432_WriteReg(0x07, 0x09);						//0x09
 
-	SendString("SI4432_Set TxMode......\r\n");
+//	SendString("SI4432_Set TxMode......\r\n");
 }
 
 //------------------------------------------------------------------------------------------------
@@ -294,7 +294,7 @@ void SI4432_SetIdleMode(void)
 	//The radio will work in idle mode
 	SI4432_WriteReg(0x07, 0x01);													//配置为ready 模式，使能更快切换到发送和接收
 
-	SendString("SI4432_Set IdleMode......\r\n");
+//	SendString("SI4432_Set IdleMode......\r\n");
 }
 
 //------------------------------------------------------------------------------------------------
@@ -325,7 +325,7 @@ void SI4432_FIFO_SendData(char length, char *payload)
 	}
 
 	SI4432_SetTxMode();
-	SendString("SI4432_Send FIFO data....\r\n");
+//	SendString("SI4432_Send FIFO data....\r\n");
 
 	/*查询方式*/
 //	while(RF4432_IRQ == 1);				//查询中断引脚来判断发送完成，这样造成必须屏蔽其他中断的麻烦

@@ -34,7 +34,7 @@
 #define KS_KEYSET_ERR		4
 /****************************变量定义*********************************************/
 bit g_homepage = 0;				//主界面标记，0界面1 =1界面2
-uchar g_keycmd = 0;
+uchar g_keycmd = KS_NORMAL;
 
 /****************************函数声明*********************************************/
 void GUI_SettingMenu(char num, char turn);
@@ -167,7 +167,13 @@ char GUI_DisplayPassword()
 			{	//---------------------返回--------------------------------
 				if(selitem==10)
 				{
-					g_menumark = MENU_SET;return 0;
+					if(g_keycmd==KS_NORMAL)
+					{
+						g_menumark = MENU_OPERATE;return 0;
+					}
+					else{
+						g_menumark = MENU_KEYSET;return 0;
+					}
 				}
 				//---------------输入数字与确认与--------------------------
 				if(wei-->0) 			
@@ -768,8 +774,9 @@ void GUI_BLSetting()
 				{
 					g_savedat.s_baklit_on = 1;
 					g_menumark = MENU_SET;
-					DAT_SaveDat(S_BL,g_savedat);
 					LCD_BL_ON;
+					DAT_SaveDat(S_BL,g_savedat);
+					
 					return ;
 				}
 				else if(wei==2) 
@@ -931,32 +938,34 @@ void GUI_SysStatus(uchar sta)
 		LCD_Clear_Region(17,113,16,64);
 		sta_last = sta;
 	}
-	switch(sta)
+	if(sta&OFFLINE)											//优先级最高
 	{
-		case FREE :{ 
-			LCD_Dis_Char_16_16(2,10,&WordLib_CN[21][0],FALSE);		//空闲
-			LCD_Dis_Char_16_16(2,11,&WordLib_CN[22][0],FALSE);
-		}break;
-		case WORK :{
-			LCD_Dis_Char_16_16(2,9,&WordLib_CN[52][0],FALSE);		//抽水中
-			LCD_Dis_Char_16_16(2,10,&WordLib_CN[4][0],FALSE);		//
-			LCD_Dis_Char_16_16(2,11,&WordLib_CN[86][0],FALSE);			
-		}break;
-		case OUTSIDE :{
-			LCD_Dis_Char_16_16(2,10,&WordLib_CN[84][0],FALSE);		//占线
-			LCD_Dis_Char_16_16(2,11,&WordLib_CN[85][0],FALSE);			
-		}break;
-		case SWOFF :{
-			LCD_Dis_Char_16_16(2,8,&WordLib_CN[8][0],FALSE);		//开关错误
-			LCD_Dis_Char_16_16(2,9,&WordLib_CN[9][0],FALSE);			
-			LCD_Dis_Char_16_16(2,10,&WordLib_CN[50][0],FALSE);		
-			LCD_Dis_Char_16_16(2,11,&WordLib_CN[51][0],FALSE);
-		}break;	
-		case OFFLINE :{
 			LCD_Dis_Char_16_16(2,10,&WordLib_CN[87][0],FALSE);		//离线
 			LCD_Dis_Char_16_16(2,11,&WordLib_CN[85][0],FALSE);			
-		}break;		
-	}//end of switch
+	}
+	else if(sta&OUTSIDE)
+	{
+			LCD_Dis_Char_16_16(2,10,&WordLib_CN[84][0],FALSE);		//占线
+			LCD_Dis_Char_16_16(2,11,&WordLib_CN[85][0],FALSE);			
+	}
+	else if(sta&SWOFF)
+	{
+		LCD_Dis_Char_16_16(2,8,&WordLib_CN[8][0],FALSE);		//开关错误
+		LCD_Dis_Char_16_16(2,9,&WordLib_CN[9][0],FALSE);			
+		LCD_Dis_Char_16_16(2,10,&WordLib_CN[50][0],FALSE);		
+		LCD_Dis_Char_16_16(2,11,&WordLib_CN[51][0],FALSE);
+	}
+	else if(sta&WORK)
+	{
+		LCD_Dis_Char_16_16(2,9,&WordLib_CN[52][0],FALSE);		//抽水中
+		LCD_Dis_Char_16_16(2,10,&WordLib_CN[4][0],FALSE);		//
+		LCD_Dis_Char_16_16(2,11,&WordLib_CN[86][0],FALSE);			
+	}
+	else
+	{
+		LCD_Dis_Char_16_16(2,10,&WordLib_CN[21][0],FALSE);		//空闲
+		LCD_Dis_Char_16_16(2,11,&WordLib_CN[22][0],FALSE);
+	}
 }
 
 
@@ -1032,7 +1041,7 @@ void GUI_HomePage()
 
 	LCD_Dis_ASCIIStr(4,19,"HOME",TRUE);						//HOME
 	
-	GUI_CaseData_Dis(55,1);
+	GUI_CaseData_Dis(g_level_per,1);
 }
 
 
