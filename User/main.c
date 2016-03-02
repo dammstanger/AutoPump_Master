@@ -135,7 +135,7 @@ void main()
 			{	
 				PUMP_OFF;
 			}									
-			else if(g_sysflag==FREE&&(g_sysflag&SLEEP==0)&&((sensor_data.possw&PEC0)==0||g_level_per<=5)) 		//没水时
+			else if(g_sysflag==FREE&&(g_sysflag&SLEEP)==0&&((sensor_data.possw&PEC0)==0||g_level_per<=5)) 		//没水时
 			{
 				PUMP_ON;
 			}
@@ -343,7 +343,7 @@ void SystemStatus(char key)
 			g_sysflag &=~SWOFF;
 		
 		if(RTCtime.hour>=22||RTCtime.hour<=6)		//晚间进入睡眠状态
-		g_sysflag |= SLEEP;
+			g_sysflag |= SLEEP;
 		else g_sysflag &= ~SLEEP;
 	}
 	
@@ -379,7 +379,7 @@ void DataAqurie()
 	}
 	else{								//接收超时
 		offlinecnt++;
-		if(++offlinecnt==5)				//3次超时判断为离线
+		if(++offlinecnt==5)				//5次超时判断为离线
 		{
 			g_offlineflag = 1;
 			offlinecnt = 0;

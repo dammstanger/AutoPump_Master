@@ -1811,16 +1811,20 @@ void GUI_CaseData_Dis(char percent,char refill)
 			}break;
 		}
 	}
-	LCD_Dis_Digital_int(2,4,0,percent,FALSE);
+	if(percent!=0)
+		LCD_Dis_Digital_int(2,4,0,percent,FALSE);
+	else 
+		LCD_Dis_Digital_int(2,4,1,percent,FALSE);
 	LCD_Dis_ASCIIStr(2,5,"%",FALSE);
-	if(percent==99&&percent - percent_last<0)	//从100%到99%，前面一位被水填充
+	if(percent - percent_last<0)	//从100%到99%，前面一位被水填充
 	{
-		LCD_fill_Region(17,9,16,8);
+		if(percent==99)
+			LCD_fill_Region(17,9,16,8);
+		else if(percent==9)
+			LCD_fill_Region(17,9,16,16);
 	}
 	percent_last = percent;
 }
-
-
 
 
 
