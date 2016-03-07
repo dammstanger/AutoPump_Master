@@ -9,7 +9,7 @@
  * 从属关系	：PoolAuto
  * 库版本	：无
  * 创建时间	：2015.7.11
- * 最后编辑	：2016.2.12
+ * 最后编辑	：2016.3.7
  **-------------------------------------------------------------------------------
 
  * 作	者	：Damm Stanger
@@ -34,8 +34,6 @@
 #include "DS18B20.h"
 #include "Dataopt.h"
 /****************************宏定义***********************************************/
-#define P2_5	0x20
-#define P2_7	0x80
 
 /****************************变量声明*********************************************/
 
@@ -49,15 +47,13 @@ bit g_1stimer_1 = 0;
 bit g_1stimer_2 = 0;
 bit g_timer_flow_start = 0;
 //---------------------------------------------
-sbit START 	= P2^7;
-sbit STOP	= P2^5;
-sbit ALARM	= P4^0;
-sbit TMP	= P4^4;
+sbit START 	= P2^7;				//启动
+sbit STOP	= P2^5;				//停止
+sbit ALARM	= P4^0;				//蜂鸣器
+sbit TMP	= P4^4;				//温度数据口
 sbit CAPWAI	= P1^3;				//外部检测
 sbit CAPNEI	= P1^4;				//内部检测
 
-char temp;
-char dat[] = "abc";
 
 //关水时延时保证断电检测可靠
 #define PUMP_ON 	START = 0;delay200ms();START = 1;delay1s();delay1s()
@@ -84,6 +80,7 @@ void main()
 {
 	uchar key=0;
 	uchar i=0;
+	uchar alarm_cnt = 0;
 	delay1s();
 
 	AUXR = AUXR|0x40;  	// T1, 1T Mode
@@ -118,13 +115,13 @@ void main()
 	IE0 = 0;
 	IE1 = 0;
 	TI = 0;
-	EA = 1;				//注意：外设初始化完再开中断！
-	SetSoftTimer(TIMER_2,5);		//设置主界面滚动延时
+	EA = 1;								//注意：外设初始化完再开中断！
+	SetSoftTimer(TIMER_2,5);			//设置主界面滚动延时
 	GUI_HomePage();
 	
 	while(1)
 	{
-		key = GUIMenu();					//菜单设置
+		key = GUIMenu();				//菜单设置
 		SystemStatus(key);				//系统状态确认
 		
 		//执行器更新---------------------------------------------------------------
@@ -149,17 +146,16 @@ void main()
 			{
 				DataAqurie();
 				
-				if(g_sysflag&OFFLINE)
+				if(g_sysflag&OFFLINE||g_sysflag&OUTSIDE)
 				{
-					ALARM = ON;
-					delay100ms();
-					ALARM = OFF;
-				}
-				else if(g_sysflag&OUTSIDE)
-				{
-					ALARM = ON;
-					delay200ms();
-					ALARM = OFF;
+					if(alarm_cnt>=4)
+					{
+						ALARM = ON;
+						delay100ms();
+						ALARM = OFF;
+						alarm_cnt = 0;
+					}
+					else alarm_cnt++;
 				}
 				else if(g_sysflag&SWOFF)
 				{
@@ -178,14 +174,14 @@ void main()
 					LCD_BL_OFF;
 					if(g_homepage) 
 					{
-						LCD_Clear();				//如果在别的页面则返回主页1
+						LCD_Clear();							//如果在别的页面则返回主页1
 						GUI_HomePage();
 					}
 					else
 					{
 						GUI_CaseData_Dis(g_level_per,0);		//更新液位，不用太频繁
 					}
-					SetSoftTimer(TIMER_2,5);				//设置延时
+					SetSoftTimer(TIMER_2,5);					//设置延时
 				}
 			}
 			else{//--------------空闲状态----------------------------------------
