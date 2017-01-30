@@ -23,7 +23,7 @@
 /****************************宏定义***********************************************/
 
 /****************************变量定义***********************************************/
-STR_EEPDAT const defaultdat={1,123456,1,0,100,613,530,AUTO};		//默认数据
+STR_EEPDAT const defaultdat={1,123456,1,0,100,613,158,MANAUL};		//默认数据
 STR_EEPDAT g_savedat={0};
 
 /********************************************************************************
@@ -112,16 +112,13 @@ void DAT_LoadDat(STR_EEPDAT *dat)
  * 返回  ：
  * 调用  ：-
  ********************************************************************************/
-void DAT_SaveDat(uchar item,STR_EEPDAT dat)
+ void DAT_SaveDat(uchar item,STR_EEPDAT dat)
 {
 	STR_EEPDAT temp;
 	if(item)
 	{
 		DAT_LoadDat(&temp);
-		do
-		{
-			IAP_EraseSector(EEPROM_SECT1);
-		}while(IAP_EEPROMCheck(SECTOR_1));
+
 		switch(item)
 		{
 			case S_KEYSW :{
@@ -152,12 +149,13 @@ void DAT_SaveDat(uchar item,STR_EEPDAT dat)
 	}
 	else {
 		temp = dat;					//所有数据都写入
-		do
-		{
-			IAP_EraseSector(EEPROM_SECT1);
-		}while(IAP_EEPROMCheck(SECTOR_1));
 	}
-
+	//写入前先整体擦除
+	do
+	{
+		IAP_EraseSector(EEPROM_SECT1);
+	}while(IAP_EEPROMCheck(SECTOR_1));
+	//逐项重新写入
 	IAP_WriteByte(EEPROM_SECT1,temp.s_needkey);
 	IAP_WriteByte(EEPROM_SECT1+1,temp.s_keyword>>24);
 	IAP_WriteByte(EEPROM_SECT1+2,temp.s_keyword>>16);

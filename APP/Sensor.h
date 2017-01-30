@@ -39,10 +39,10 @@ typedef struct{
 }TMPDAT;
 
 extern TMPDAT tmp_data;
-extern char g_level_per;
+extern uchar g_level_per;
 
 void TemperDatHandle(void);
-uint PressDatHandle(void);
+uint LevelADCHandle(void);
 void LevelDatHandle(void);
 
 #endif

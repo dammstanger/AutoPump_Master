@@ -35,11 +35,11 @@
 #define WORK		0x80
 #define FREE		0x00
 
-#define STATUS		0x07
-#define OUTSIDE		0x01
-#define SWOFF		0x02
-#define OFFLINE		0x04
-#define SLEEP		0x08
+#define STATUS		0x07					//所有异常
+#define OUTSIDE		0x01					//邻家抽水
+#define SWOFF			0x02					//抽水开关错误
+#define OFFLINE		0x04					//与检测单元离线
+#define SLEEP			0x08					//晚间睡眠模式
 
 /****************************类型定义***********************************************/
 typedef enum {FALSE = 0, TRUE = !FALSE} bool;

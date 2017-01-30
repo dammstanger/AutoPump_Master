@@ -22,6 +22,7 @@
 #include "UART_51.h"
 #include "Transmit.h"
 #include "Sensor.h"
+#include "dataopt.h"
 #include "LCD_GUI.h"
 #include "YXD19264D_51.h"
 #include "DS18B20.h"
@@ -30,7 +31,7 @@
 /****************************变量定义*********************************************/
 PAG_DATA sensor_data={0,0,0,0,0x02,0x44,0x01,0xff,};
 TMPDAT	tmp_data={8888,8888};
-char g_level_per=50;
+uchar g_level_per=50;
 /********************************************************************************
  * 函数名：TemperDatHandle()
  * 描述  ：温度数据处理
@@ -41,9 +42,9 @@ char g_level_per=50;
 void TemperDatHandle()
 {
 	tmp_data.tmp2 = DS18B20_ReadTemperature(1);
-//	SendString("temp2:\r\n");									//调试信息时候用
-//	SendTemp(tmp_data.tmp2);
-//	SendString("\r\n");
+	SendString("temp2:\r\n");									//调试信息时候用
+	SendTemp(tmp_data.tmp2);
+	SendString("\r\n");
 //	tmp_data.tmp1 = (uint)sensor_data.temp1_h<<8|(uint)sensor_data.temp1_l;
 //	SendString("temp1:\r\n");
 //	SendByteASCII(tmp_data.tmp1);
@@ -52,27 +53,25 @@ void TemperDatHandle()
 //	SendString("temp2:\r\n");
 //	SendByteASCII(tmp_data.tmp2);
 //	SendString("\r\n");
-//	if(tmp_data.tmp1>5000) tmp_data.tmp1 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
+//	if(tmp_data.tmp1>5000) tmp_data.tmp1 = 8888;		//默认没有零下的情况，50度以上显示错误88.88度
 	if(tmp_data.tmp2>5000) tmp_data.tmp2 = 8888;			//默认没有零下的情况，50度以上显示错误88.88度
 }
 
 /********************************************************************************
- * 函数名：PressDatHandle()
- * 描述  ：压力数据处理
+ * 函数名：LevelADCHandle()
+ * 描述  ：液位模拟量数据处理
  * 输入  ：-
  * 返回  ：-
  * 调用  ：-
  ********************************************************************************/
-uint PressDatHandle()
+uint LevelADCHandle()
 {
-	uint press = (uint)sensor_data.press_h<<8|(uint)sensor_data.press_l;
-
 	SendString("ADC data:\r\n");			
 	SendByteASCII(sensor_data.press_h);
 	SendByteASCII(sensor_data.press_l);
 	SendString("\r\n");	
 	
-	return press;
+	return (uint)sensor_data.press_h<<8|(uint)sensor_data.press_l;;
 }	
 
 
@@ -85,36 +84,46 @@ uint PressDatHandle()
  ********************************************************************************/
 void LevelDatHandle()
 {
-	uint max=611,min=532,press;
+	static bool flg_ful_emty = 0;
+	static uint max=0x3ff,min=0x9a;
+	uint level_adc;
+	
 	float k,b;
-	
-	press = PressDatHandle();
-	k = -100.0/(max-min);
-	b = -(k*max);
-	g_level_per = (char)(k*press + b);
-	
-	if((sensor_data.possw&PEC100)==0)
-	g_level_per =100;
-	else if((sensor_data.possw&PEC0)==0)
-	g_level_per =0;
-	
-	if(g_level_per<0) g_level_per = 0;
-	if(g_level_per>100) g_level_per = 100;
-	
-	SendString("possw data:\r\n");			
-	SendByteASCII(sensor_data.possw);
-	SendString("\r\n");			
-	SendString("flow data:\r\n");			
-	SendByteASCII(sensor_data.flow);
-	SendString("\r\n");	
-}
 
-/********************************************************************************
- * 函数名：SPI_ISR()
- * 描述  ：SPI中断服务函数
- * 输入  ：-
- * 返回  ：-
- * 调用  ：-
- ********************************************************************************/
+	//获取液位模拟量
+	level_adc = LevelADCHandle();
+	
+	//通过液位开关校准液位传感器
+	if((sensor_data.possw&PEC100)==0)
+	{
+		g_level_per =100;
+		if(!flg_ful_emty)
+		{
+			flg_ful_emty = 1;
+			max = level_adc;
+			g_savedat.s_adcmax = level_adc;
+			DAT_SaveDat(S_ADCMAX,g_savedat);
+		}
+	}
+	else if((sensor_data.possw&PEC0)==0)			//零液位点暂未检测
+	{
+		g_level_per =0;
+		if(!flg_ful_emty)
+		{
+			flg_ful_emty = 1;
+			min = level_adc;
+			g_savedat.s_adcmin = level_adc;
+			DAT_SaveDat(S_ADCMIN,g_savedat);
+		}
+	}
+	else {																		//
+		flg_ful_emty = 0;
+		k = 100.0/(max-min);
+		b = (k*min);
+		g_level_per = (uchar)(k*level_adc + b);
+		if(g_level_per<0) g_level_per = 0;
+		if(g_level_per>100) g_level_per = 100;
+	}
+}
 
 /******************* (C) COPYRIGHT 2016 DammStanger *****END OF FILE************/

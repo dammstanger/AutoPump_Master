@@ -31,6 +31,7 @@
 
 #My config
 AutoPumpV2_master
+*.uvgui.Administrator
 *.uvgui.DammStangerTS
 *.uvgui.Xiaodeng
 #*.uvopt

@@ -32,17 +32,17 @@
 #define S_MODE				8
 /****************************类型定义*********************************************/
 typedef struct{
-	uchar s_needkey;
-	unsigned long s_keyword;
-	uchar s_baklit_on;
-	uchar s_startl;
-	uchar s_stopl;
-	uint s_adcmax;
-	uint s_adcmin;
-	uchar mode;
-}STR_EEPDAT;
+	uchar s_needkey;									//设置需要密码
+	unsigned long s_keyword;					//密码值
+	uchar s_baklit_on;								//背光
+	uchar s_startl;										//自动启动抽水的液位0-100
+	uchar s_stopl;										//自动停止抽水的液位
+	uint s_adcmax;										//模拟液位信号的最大值，
+	uint s_adcmin;										//模拟液位信号的最小值，
+	uchar mode;												//操作模式：自动/手动
+}STR_EEPDAT;												//EEPROM存储的数据结构体
 /****************************变量声明*********************************************/
- extern STR_EEPDAT g_savedat;
+extern STR_EEPDAT g_savedat;
 extern STR_EEPDAT const defaultdat;
 /****************************变量定义*********************************************/
 

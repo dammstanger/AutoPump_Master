@@ -66,13 +66,13 @@ void SystemStatus(char key);
 
 void EXTI0_Init()
 {
-	IT0 = 1;                        //set INT0 int type (1:Falling 0:Low level)
+		IT0 = 1;                        //set INT0 int type (1:Falling 0:Low level)
     EX0 = 1;                        //enable INT0 interrupt
 }
 
 void T0_EXT_Init()
 {
-	WAKE_CLKO = 0x10;               //将Timer0的中断用于外部下降沿中断
+		WAKE_CLKO = 0x10;               //将Timer0的中断引脚P3.5用于外部下降沿中断
     ET0 = 1;                        //enable T0 interrupt
 }
 
@@ -83,21 +83,21 @@ void main()
 	uchar alarm_cnt = 0;
 	delay1s();
 
-	AUXR = AUXR|0x40;  	// T1, 1T Mode
+	AUXR = AUXR|0x40;  									// T1, 1T Mode
 
 	UART_Init();
 //	IAP_EraseSector(EEPROM_SECT1);		//擦除EEPROM
 //	IAP_EraseSector(EEPROM_SECT2);
-	if(IAP_EEPROMCheck(SECTOR_ALL))		//有数据，不为空
+	if(IAP_EEPROMCheck(SECTOR_ALL))			//有数据，不为空
 		DAT_InitDat(FALSE);
 	else
-		DAT_InitDat(TRUE);				//无数据，设为默认值
+		DAT_InitDat(TRUE);								//无数据，设为默认值
 	EXTI0_Init();     
 	T0_EXT_Init();	
 	SPI_Init(MASTER);
 	IIC_GPIO_Config();
 
-	P4SW |= 0x10;			//18B20
+	P4SW |= 0x10;			//18B20						
 	SendString("ROMID:\r\n");
 	DS18B20_Read_RomID(*RomID);
 	SendROMID(1);
@@ -128,27 +128,28 @@ void main()
 		if((g_savedat.mode==AUTO)&&(g_sysflag&OFFLINE)==0)
 		{	//
 			if(g_sysflag&WORK&&(g_sysflag&STATUS||								//在工作过程中遇到问题,
-			(sensor_data.possw&FULL)==0||(sensor_data.possw&PEC100)==0||g_level_per>=94))//水满时
+			(sensor_data.possw&FULL)==0||g_level_per>=94))//水满时
 			{	
 				PUMP_OFF;
 			}									
-			else if(g_sysflag==FREE&&(g_sysflag&SLEEP)==0&&((sensor_data.possw&PEC0)==0||g_level_per<=5)) 		//没水时
-			{
-				PUMP_ON;
-			}
+//			else if(g_sysflag==FREE&&(g_sysflag&SLEEP)==0&&((sensor_data.possw&PEC0)==0||g_level_per<=5)) 		//没水时,暂不自动抽水
+//			{
+//				PUMP_ON;
+//			}
 		}
 		
-		//界面更新-------------------------------------------------------
+		//界面，指示更新------------------------------------------------------
 		if(ReadSoftTimer(TIMER_2))
 		{	
-			//--------------工作状态----------------------------------------
+			//--------------工作或异常状态----------------------------------------
 			if(g_sysflag&WORK||g_sysflag&STATUS)
 			{
 				DataAqurie();
 				
+				//工作时，状态异常需要报警，1分钟响铃一次
 				if(g_sysflag&OFFLINE||g_sysflag&OUTSIDE)
 				{
-					if(alarm_cnt>=4)
+					if(alarm_cnt>=12)							
 					{
 						ALARM = ON;
 						delay100ms();
@@ -159,20 +160,26 @@ void main()
 				}
 				else if(g_sysflag&SWOFF)
 				{
-					ALARM = ON;
-					delay200ms();
-					ALARM = OFF;
-					delay200ms();
-					ALARM = ON;
-					delay200ms();
-					ALARM = OFF;
+					if(alarm_cnt>=12)							
+					{
+						alarm_cnt = 0;
+						ALARM = ON;
+						delay200ms();
+						ALARM = OFF;
+						delay200ms();
+						ALARM = ON;
+						delay200ms();
+						ALARM = OFF;
+					}
+					else alarm_cnt++;
 				}
 				else delay200ms();
 				
+				//
 				if(g_menumark==0)
 				{
 					LCD_BL_OFF;
-					if(g_homepage) 
+					if(g_homepage)
 					{
 						LCD_Clear();							//如果在别的页面则返回主页1
 						GUI_HomePage();
@@ -213,7 +220,6 @@ void main()
 				GUI_HomePageUpdate();
 			else
 				GUI_HomePage2Update();
-			
 		}
 //		if(g_1stimer_2)
 //		{
@@ -283,7 +289,7 @@ char GUIMenu()
 }
 
 
-
+//系统状态检测
 void SystemStatus(char key)
 {
 	//确定系统状态------------------------------------------
@@ -292,16 +298,17 @@ void SystemStatus(char key)
 	else
 		g_sysflag |= WORK;						//工作
 	//工作与空闲都需要判断的状态-------------------------
-	if(g_offlineflag)							//首先判断是否离线
+	if(g_offlineflag)								//首先判断是否离线
 		g_sysflag |= OFFLINE;
 	else g_sysflag &= ~OFFLINE;					//
-	if(CAPWAI==0&&CAPNEI==1)					//别家抽水
+	if(CAPWAI==0&&CAPNEI==1)						//别家抽水
 		g_sysflag |= OUTSIDE;
 	else g_sysflag &= ~OUTSIDE;					//
 	
 
 	if(g_sysflag&WORK)//-------------工作-------------------------------
 	{
+		//先清除旧状态
 		g_sysflag &= ~SWOFF;
 		g_sysflag &= ~SLEEP;
 		if(sensor_data.flow==NO_FLOW&&g_timeoverflg==0)	//如果没水出则开始计时
@@ -323,16 +330,18 @@ void SystemStatus(char key)
 		else if(sensor_data.flow==HAS_FLOW)
 		{
 			g_timer_flow_start = 0;						//复位计时
-			g_timeoverflg = 0;							//复位超时标记
+			g_timeoverflg = 0;								//复位超时标记
 		}
-		else if(g_timeoverflg==1)
+		
+		//超时切换状态
+		if(g_timeoverflg==1)
 		{
-			g_sysflag |= SWOFF;							//超时切换状态
+			g_sysflag |= SWOFF;							
 		}
 	}//-----------------------------空闲-------------------------------------
 	else {
 		g_timer_flow_start = 0;						//复位计时
-		g_timeoverflg = 0;							//复位超时标记
+		g_timeoverflg = 0;								//复位超时标记
 		
 		//s空闲时手动情况下清除SWOFF错误
 		if((g_sysflag&SWOFF)&&(g_savedat.mode==MANAUL||key==KEY_HOME))	
@@ -353,7 +362,7 @@ void DataAqurie()
 	static uchar offlinecnt = 0;
 	//发送采集数据指令
 	DATA_Cmd_Pkg_Send();
-	SetSoftTimer(TIMER_3,5);			//设置发送超时
+	SetSoftTimer(TIMER_3,5);			//设置接收超时
 	do{
 		if(Trans_RevPakFin||ReadSoftTimer(TIMER_3)) break;
 	}
@@ -362,7 +371,7 @@ void DataAqurie()
 	{
 		Trans_RevPakFin = 0;
 		g_offlineflag = 0;				//离线标记清零
-		offlinecnt = 0;					//离线计数清零
+		offlinecnt = 0;						//离线计数清零
 		if(2==Pak_Handle())
 		{
 			SendString("valid data received.\r\n");		
@@ -373,7 +382,7 @@ void DataAqurie()
 			LevelDatHandle();
 		}
 	}
-	else{								//接收超时
+	else{												//接收超时
 		offlinecnt++;
 		if(++offlinecnt==5)				//5次超时判断为离线
 		{
