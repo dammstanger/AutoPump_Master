@@ -24,14 +24,18 @@
 
 /****************************宏定义***********************************************/
 //possw
-#define PEC100		0x10
-#define PEC50		0x08
-#define PEC25		0x04
-#define PEC0		0x01
-#define FULL		0x20		//满了
+#define PEC100		0x10u
+#define PEC50		0x08u
+#define PEC25		0x04u
+#define PEC0		0x01u
+#define FULL		0x20u		//满了
 //flow
-#define HAS_FLOW	0x00		//有水出
-#define NO_FLOW		0x01		//没水出
+#define HAS_FLOW	0x00u		//有水出
+#define NO_FLOW		0x01u		//没水出
+//switch
+#define SW_ON			0u					//以电平定义开关量的通断
+#define SW_OFF			1u
+
 /****************************类型定义***********************************************/
 typedef struct{
 	uint tmp1;

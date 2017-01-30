@@ -9,7 +9,7 @@
  * 从属关系	：PoolAuto
  * 库版本	：无
  * 创建时间	：2015.7.11
- * 最后编辑	：2016.3.7
+ * 最后编辑	：2017.1.30
  **-------------------------------------------------------------------------------
 
  * 作	者	：Damm Stanger
@@ -311,33 +311,33 @@ void SystemStatus(char key)
 		//先清除旧状态
 		g_sysflag &= ~SWOFF;
 		g_sysflag &= ~SLEEP;
-		if(sensor_data.flow==NO_FLOW&&g_timeoverflg==0)	//如果没水出则开始计时
-		{
-			if(g_timer_flow_start==0)
-			{
-				g_timer_flow_start = 1;
-				SetSoftTimer(TIMER_4,30);				//设置上水延时30s
-			}
-			else
-			{
-				if(ReadSoftTimer(TIMER_4))
-				{
-					g_timer_flow_start = 0;
-					g_timeoverflg = 1;
-				}
-			}
-		}
-		else if(sensor_data.flow==HAS_FLOW)
-		{
-			g_timer_flow_start = 0;						//复位计时
-			g_timeoverflg = 0;								//复位超时标记
-		}
-		
-		//超时切换状态
-		if(g_timeoverflg==1)
-		{
-			g_sysflag |= SWOFF;							
-		}
+//		if(sensor_data.flow==NO_FLOW&&g_timeoverflg==0)	//如果没水出则开始计时
+//		{
+//			if(g_timer_flow_start==0)
+//			{
+//				g_timer_flow_start = 1;
+//				SetSoftTimer(TIMER_4,30);				//设置上水延时30s
+//			}
+//			else
+//			{
+//				if(ReadSoftTimer(TIMER_4))
+//				{
+//					g_timer_flow_start = 0;
+//					g_timeoverflg = 1;
+//				}
+//			}
+//		}
+//		else if(sensor_data.flow==HAS_FLOW)
+//		{
+//			g_timer_flow_start = 0;						//复位计时
+//			g_timeoverflg = 0;								//复位超时标记
+//		}
+//		
+//		//超时切换状态
+//		if(g_timeoverflg==1)
+//		{
+//			g_sysflag |= SWOFF;							
+//		}
 	}//-----------------------------空闲-------------------------------------
 	else {
 		g_timer_flow_start = 0;						//复位计时

@@ -126,7 +126,7 @@ extern PAG_DATA sensor_data;
 	TransPkgSend();								\
 }
 
-#define DATA_Cmd_Handle()										\
+#define DATA_Ack_Handle()										\
 {																\
 	pag_data->temp1_h 	= *(Revbuf+PAG_TEMP1_ADDR_H);			\
 	pag_data->temp1_l 	= *(Revbuf+PAG_TEMP1_ADDR_L);			\
@@ -136,6 +136,11 @@ extern PAG_DATA sensor_data;
 	pag_data->press_l	= *(Revbuf+PAG_PRESS_ADDR_L);			\
 	pag_data->flow 		= *(Revbuf+PAG_FLOW_ADDR);				\
 	pag_data->possw 	= *(Revbuf+PAG_POSSW_ADDR);				\
+}
+
+
+#define DATA_Cmd_Handle()											\
+{																\
 }
 
 #define DATA_Cmd_ACK()											\

@@ -83,7 +83,7 @@ uchar Pak_Handle(void)
 	}
 	else if(Is_DATA_Ack_Pkg())
 	{	
-		DATA_Cmd_Handle();
+		DATA_Ack_Handle();
 		return 2;
 	}
 	return 0;

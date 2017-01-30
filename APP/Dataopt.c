@@ -23,7 +23,7 @@
 /****************************宏定义***********************************************/
 
 /****************************变量定义***********************************************/
-STR_EEPDAT const defaultdat={1,123456,1,0,100,613,158,MANAUL};		//默认数据
+STR_EEPDAT const defaultdat={1,123456,1,0,100,1023,0x95,MANAUL};		//默认数据
 STR_EEPDAT g_savedat={0};
 
 /********************************************************************************
@@ -169,7 +169,7 @@ void DAT_LoadDat(STR_EEPDAT *dat)
 	IAP_WriteByte(EEPROM_SECT1+10,temp.s_adcmin>>8);
 	IAP_WriteByte(EEPROM_SECT1+11,temp.s_adcmin);
 	IAP_WriteByte(EEPROM_SECT1+12,temp.mode);
-	SendString("data is saved>>>>>.\r\n");
+	SendString("EEPROM data is saved .\r\n");
 	
 }
 /******************* (C) COPYRIGHT 2016 DammStanger *****END OF FILE************/

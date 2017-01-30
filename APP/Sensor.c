@@ -42,7 +42,7 @@ uchar g_level_per=50;
 void TemperDatHandle()
 {
 	tmp_data.tmp2 = DS18B20_ReadTemperature(1);
-	SendString("temp2:\r\n");									//调试信息时候用
+	SendString("local temp:\r\n");									//调试信息时候用
 	SendTemp(tmp_data.tmp2);
 	SendString("\r\n");
 //	tmp_data.tmp1 = (uint)sensor_data.temp1_h<<8|(uint)sensor_data.temp1_l;
@@ -85,45 +85,77 @@ uint LevelADCHandle()
 void LevelDatHandle()
 {
 	static bool flg_ful_emty = 0;
-	static uint max=0x3ff,min=0x9a;
-	uint level_adc;
+	float k = 100.0/(g_savedat.s_adcmax-g_savedat.s_adcmin);
+	float b = g_savedat.s_adcmin;
+	int level_adc;
 	
-	float k,b;
-
 	//获取液位模拟量
 	level_adc = LevelADCHandle();
 	
 	//通过液位开关校准液位传感器
-	if((sensor_data.possw&PEC100)==0)
+	if((sensor_data.possw&PEC100)==SW_ON)
 	{
 		g_level_per =100;
 		if(!flg_ful_emty)
 		{
 			flg_ful_emty = 1;
-			max = level_adc;
+			g_savedat.s_adcmax = level_adc;
+			SendString("max data save.\r\n");		
 			g_savedat.s_adcmax = level_adc;
 			DAT_SaveDat(S_ADCMAX,g_savedat);
+			k = 100.0/(g_savedat.s_adcmax-g_savedat.s_adcmin);
+			b = g_savedat.s_adcmin;
+
 		}
 	}
-	else if((sensor_data.possw&PEC0)==0)			//零液位点暂未检测
+	else if((sensor_data.possw&PEC0)==SW_ON)			//零液位点暂未检测
 	{
 		g_level_per =0;
+		SendString("at 0 level.flg_ful_emty :\r\n");	
+		SendByteASCII(flg_ful_emty);
+		SendString("\r\n");	
 		if(!flg_ful_emty)
 		{
 			flg_ful_emty = 1;
-			min = level_adc;
+			g_savedat.s_adcmin = level_adc;
+			SendString("min data save.\r\n");	
+			SendByteASCII(g_savedat.s_adcmin);		
 			g_savedat.s_adcmin = level_adc;
 			DAT_SaveDat(S_ADCMIN,g_savedat);
+			k = 100.0/(g_savedat.s_adcmax-g_savedat.s_adcmin);
+			b = g_savedat.s_adcmin;
 		}
 	}
-	else {																		//
+	else {		
+
 		flg_ful_emty = 0;
-		k = 100.0/(max-min);
-		b = (k*min);
-		g_level_per = (uchar)(k*level_adc + b);
-		if(g_level_per<0) g_level_per = 0;
+		level_adc = level_adc - b;
+		if(level_adc<0) level_adc = 0;
+		g_level_per = (uchar)(k*level_adc);
+
 		if(g_level_per>100) g_level_per = 100;
+		
+		SendString("RT level data.\r\n");	
+		SendByteASCII(level_adc>>8);	
+		SendByteASCII(level_adc);	
+		SendString("\r\n");		//
+		SendString("min data.\r\n");	
+		SendByteASCII(g_savedat.s_adcmin);	
+		SendString("\r\n");		//
+		SendString("max data.\r\n");	
+		SendByteASCII(g_savedat.s_adcmax);	
+		SendString("\r\n");		//
+		
+		SendString("cal pec\r\n");	
+		SendByteASCII(g_level_per);		
+		SendString("\r\n");		//
 	}
+	SendString("possw data:\r\n");			
+	SendByteASCII(sensor_data.possw);
+	SendString("\r\n");
+	SendString("flow data:\r\n");
+	SendByteASCII(sensor_data.flow);
+	SendString("\r\n");
 }
 
 /******************* (C) COPYRIGHT 2016 DammStanger *****END OF FILE************/
