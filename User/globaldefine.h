@@ -37,10 +37,12 @@
 
 #define STATUS		0x07					//所有异常
 #define OUTSIDE		0x01					//邻家抽水
-#define SWOFF			0x02					//抽水开关错误
+#define SWOFF		0x02					//抽水开关错误
 #define OFFLINE		0x04					//与检测单元离线
-#define SLEEP			0x08					//晚间睡眠模式
+#define SLEEP		0x08					//晚间睡眠模式
 
+//抽水超时时间值
+#define OVERTIME_MIN	27u					//单位分钟
 /****************************类型定义***********************************************/
 typedef enum {FALSE = 0, TRUE = !FALSE} bool;
 /****************************变量定义*********************************************/

@@ -117,6 +117,7 @@ void main()
 	TI = 0;
 	EA = 1;								//注意：外设初始化完再开中断！
 	SetSoftTimer(TIMER_2,5);			//设置主界面滚动延时
+	SoftUpTimer_Reset(&UpTimer1);
 	GUI_HomePage();
 	
 	while(1)
@@ -128,14 +129,14 @@ void main()
 		if((g_savedat.mode==AUTO)&&(g_sysflag&OFFLINE)==0)
 		{	//
 			if(g_sysflag&WORK&&(g_sysflag&STATUS||								//在工作过程中遇到问题,
-			(sensor_data.possw&FULL)==0||g_level_per>=94))//水满时
+			(sensor_data.possw&FULL)==0||g_level_per>=99||UpTimer1.min>=OVERTIME_MIN))//水满时
 			{	
 				PUMP_OFF;
 			}									
-//			else if(g_sysflag==FREE&&(g_sysflag&SLEEP)==0&&((sensor_data.possw&PEC0)==0||g_level_per<=5)) 		//没水时,暂不自动抽水
-//			{
-//				PUMP_ON;
-//			}
+			else if(g_sysflag==FREE&&(g_sysflag&SLEEP)==0&&g_level_per<=30) 		//没水时,暂不自动抽水
+			{
+				PUMP_ON;
+			}
 		}
 		
 		//界面，指示更新------------------------------------------------------
@@ -144,6 +145,7 @@ void main()
 			//--------------工作或异常状态----------------------------------------
 			if(g_sysflag&WORK||g_sysflag&STATUS)
 			{
+				SoftUpTimer_Start(&UpTimer1);			//启动抽水计时
 				DataAqurie();
 				
 				//工作时，状态异常需要报警，1分钟响铃一次
@@ -173,7 +175,22 @@ void main()
 					}
 					else alarm_cnt++;
 				}
-				else delay200ms();
+				else if(g_level_per>=95)
+				{
+					if(alarm_cnt>=6)					//水要满时，每30s响铃一次						
+					{
+						alarm_cnt = 0;
+						ALARM = ON;
+						delay200ms();
+						ALARM = OFF;
+						delay200ms();
+						ALARM = ON;
+						delay200ms();
+						ALARM = OFF;
+					}
+					else alarm_cnt++;					
+				}
+				else ;
 				
 				//
 				if(g_menumark==0)
@@ -192,6 +209,7 @@ void main()
 				}
 			}
 			else{//--------------空闲状态----------------------------------------
+				SoftUpTimer_Stop(&UpTimer1);					//停止抽水计时
 				if(g_menumark==0)
 				{
 					LCD_BL_OFF;
@@ -213,14 +231,14 @@ void main()
 			}
 		}	
 		//-----------------------主界面数据更新---------------------------------		
-		if(g_1stimer_1&&g_menumark==0)
-		{
-			g_1stimer_1 = 0;
-			if(g_homepage==0)
-				GUI_HomePageUpdate();
-			else
-				GUI_HomePage2Update();
-		}
+//		if(g_1stimer_1&&g_menumark==0)
+//		{
+//			g_1stimer_1 = 0;
+//			if(g_homepage==0)
+//				GUI_HomePageUpdate();
+//			else
+//				GUI_HomePage2Update();
+//		}
 //		if(g_1stimer_2)
 //		{
 //			g_1stimer_2 = 0;
@@ -330,7 +348,7 @@ void SystemStatus(char key)
 //		else if(sensor_data.flow==HAS_FLOW)
 //		{
 //			g_timer_flow_start = 0;						//复位计时
-//			g_timeoverflg = 0;								//复位超时标记
+//			g_timeoverflg = 0;							//复位超时标记
 //		}
 //		
 //		//超时切换状态
@@ -341,7 +359,7 @@ void SystemStatus(char key)
 	}//-----------------------------空闲-------------------------------------
 	else {
 		g_timer_flow_start = 0;						//复位计时
-		g_timeoverflg = 0;								//复位超时标记
+		g_timeoverflg = 0;							//复位超时标记
 		
 		//s空闲时手动情况下清除SWOFF错误
 		if((g_sysflag&SWOFF)&&(g_savedat.mode==MANAUL||key==KEY_HOME))	
@@ -371,7 +389,7 @@ void DataAqurie()
 	{
 		Trans_RevPakFin = 0;
 		g_offlineflag = 0;				//离线标记清零
-		offlinecnt = 0;						//离线计数清零
+		offlinecnt = 0;					//离线计数清零
 		if(2==Pak_Handle())
 		{
 			SendString("valid data received.\r\n");		
@@ -382,7 +400,7 @@ void DataAqurie()
 			LevelDatHandle();
 		}
 	}
-	else{												//接收超时
+	else{								//接收超时
 		offlinecnt++;
 		if(++offlinecnt==5)				//5次超时判断为离线
 		{
@@ -408,9 +426,15 @@ void T0_EXT_ISR() interrupt 1
 	g_1stimer_2 = 1;
 	SoftTimer();
 	DS3231_ReadTime();
-
-
+	SoftUpTimer(&UpTimer1);
+	if(g_menumark==MENU_HOME||g_menumark==MENU_OPERATE){
+		if(g_homepage==0)
+			GUI_HomePageUpdate();
+		else
+			GUI_HomePage2Update();
+	}
 }
+
 
 /******************* (C) COPYRIGHT 2016 DammStanger *****END OF FILE************/
 

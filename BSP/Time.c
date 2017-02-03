@@ -18,9 +18,13 @@
 
 /****************************包含头文件*******************************************/
 #include "Time.h"
+
 /****************************宏定义***********************************************/
 
 /****************************变量定义***********************************************/
+STR_TIM_M_S UpTimer1={0,0,0};
+
+
 uchar Timer_reg=0;
 uchar Timer1_cnt = 0;			//最小单位1s,最大定时255秒
 uchar Timer2_cnt = 0;
@@ -131,6 +135,51 @@ void SoftTimer()
 	if(Timer4_cnt)	Timer4_cnt--;
 	else 		Timer_reg |= 0x08;
 }
+
+
+void SoftUpTimer_Reset(STR_TIM_M_S *timer)
+{
+	timer->working = 0;
+	timer->sec = 0;
+	timer->min = 0;
+}
+
+void SoftUpTimer_Start(STR_TIM_M_S *timer)
+{
+	if(timer->working!=1) timer->working = 1;
+}
+
+
+void SoftUpTimer_Stop(STR_TIM_M_S *timer)
+{
+	if(timer->working) timer->working = 0;
+}
+
+void SoftUpTimer(STR_TIM_M_S *timer)
+{
+	if(timer->working)
+	{
+		if(timer->sec==59)
+		{
+			timer->sec = 0;
+			if(timer->min==255)
+				timer->min = 0;
+			else timer->min++;
+		}
+		timer->sec++;
+	}
+}
+
+//读分钟，舍去秒值
+uchar SoftTimer_ReadMin(STR_TIM_M_S timer)
+{
+	return timer.min;
+}
 	
+uint SoftTimer_ReadSec(STR_TIM_M_S timer)
+{
+	return timer.min*60+timer.sec;
+}
+
 /******************* (C) COPYRIGHT 2016 DammStanger *****END OF FILE************/
 

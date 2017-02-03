@@ -35,6 +35,7 @@
 /****************************变量定义*********************************************/
 bit g_homepage = 0;				//主界面标记，0界面1 =1界面2
 uchar g_keycmd = KS_NORMAL;
+bit homedispbusy = 0;			//主界面显示忙碌标志，为1时禁止中断内的主界面更新
 
 /****************************函数声明*********************************************/
 void GUI_SettingMenu(char num, char turn);
@@ -1004,12 +1005,9 @@ void GUI_SysMode(uchar mode)
 void GUI_HomePage()
 {
 	g_homepage = 0;
+	homedispbusy = 1;
 	LCD_Dis_Pict(1,1,45,62,Pic_Case);
-	
-//	LCD_Dis_Char_16_16(1,5,&WordLib_CN[0][0],FALSE);		//实时水温
-//	LCD_Dis_Char_16_16(1,6,&WordLib_CN[1][0],FALSE);		//
-//	LCD_Dis_Char_16_16(1,7,&WordLib_CN[4][0],FALSE);		//
-//	LCD_Dis_Char_16_16(1,8,&WordLib_CN[2][0],FALSE);		//	
+		
 	LCD_Dis_Char_16_16(1,5,&WordLib_CN[6][0],FALSE);		//时间
 	LCD_Dis_Char_16_16(1,6,&WordLib_CN[7][0],FALSE);		//
 	LCD_Dis_ASCIIStr(1,13,":",FALSE);	
@@ -1042,6 +1040,7 @@ void GUI_HomePage()
 	LCD_Dis_ASCIIStr(4,19,"HOME",TRUE);						//HOME
 	
 	GUI_CaseData_Dis(g_level_per,1);
+	homedispbusy = 0;
 }
 
 
@@ -1055,6 +1054,7 @@ void GUI_HomePage()
 void GUI_HomePage2()
 {
 	g_homepage = 1;
+	homedispbusy = 1;
 	LCD_Dis_Char_16_16(1,3,&WordLib_CN[4][0],FALSE);		//水位自动控制系统
 	LCD_Dis_Char_16_16(1,4,&WordLib_CN[5][0],FALSE);		//
 	LCD_Dis_Char_16_16(1,5,&WordLib_CN[13][0],FALSE);		//
@@ -1089,12 +1089,10 @@ void GUI_HomePage2()
 		case 7 : 	LCD_Dis_Char_16_16(3,10,&WordLib_CN[33][0],FALSE);break;		
 	}
 	
-//	LCD_Dis_Char_16_16(4,1,&WordLib_CN[31][0],FALSE);		//气温
-//	LCD_Dis_Char_16_16(4,2,&WordLib_CN[2][0],FALSE);		//	
-//	LCD_Dis_ASCIIStr(4,5,":",FALSE);
 	GUI_DisplayAirTemp();
 	LCD_Dis_Char_8_16(4,15,&CharLib_SplLabel[0][0],FALSE);
 	LCD_Dis_ASCIIStr(4,16,"C",FALSE);
+	homedispbusy = 0;
 }
 
 
@@ -1107,12 +1105,21 @@ void GUI_HomePage2()
  ********************************************************************************/
 void GUI_HomePageUpdate()
 {
-	LCD_Dis_Digital_int(1,16,2,RTCtime.hour,FALSE);			//时分秒
-	LCD_Dis_Digital_int(1,19,2,RTCtime.min,FALSE);
-	LCD_Dis_Digital_int(1,22,2,RTCtime.sec,FALSE);
-	GUI_SysStatus(g_sysflag);
-	GUI_SysMode(g_savedat.mode);
-
+	if(!homedispbusy){
+		if(g_sysflag&WORK)
+		{
+			LCD_Dis_Digital_int(1,16,2,0,FALSE);					//时分秒
+			LCD_Dis_Digital_int(1,19,2,UpTimer1.min,FALSE);
+			LCD_Dis_Digital_int(1,22,2,UpTimer1.sec,FALSE);
+		}
+		else{
+			LCD_Dis_Digital_int(1,16,2,RTCtime.hour,FALSE);			//时分秒
+			LCD_Dis_Digital_int(1,19,2,RTCtime.min,FALSE);
+			LCD_Dis_Digital_int(1,22,2,RTCtime.sec,FALSE);
+		}
+		GUI_SysStatus(g_sysflag);
+		GUI_SysMode(g_savedat.mode);
+	}
 }
 
 /********************************************************************************
@@ -1124,9 +1131,11 @@ void GUI_HomePageUpdate()
  ********************************************************************************/
 void GUI_HomePage2Update()
 {
-	LCD_Dis_Digital_int(3,6,2,RTCtime.hour,FALSE);					//时分秒
-	LCD_Dis_Digital_int(3,9,2,RTCtime.min,FALSE);
-	LCD_Dis_Digital_int(3,12,2,RTCtime.sec,FALSE);
+	if(!homedispbusy){
+		LCD_Dis_Digital_int(3,6,2,RTCtime.hour,FALSE);					//时分秒
+		LCD_Dis_Digital_int(3,9,2,RTCtime.min,FALSE);
+		LCD_Dis_Digital_int(3,12,2,RTCtime.sec,FALSE);
+	}
 }
 
 /********************************************************************************
@@ -1138,6 +1147,8 @@ void GUI_HomePage2Update()
  ********************************************************************************/
 void GUI_HomeMenu(char selitem)
 {
+	homedispbusy = 1;
+
 	switch(selitem)
 	{
 		case 1 :{	LCD_Dis_Char_16_16(4,2,&WordLib_CN[23][0],FALSE);		//历史
@@ -1165,6 +1176,8 @@ void GUI_HomeMenu(char selitem)
 					LCD_Dis_ASCIIStr(4,19,"HOME",FALSE);					//HOME
 		}break;
 	}
+	homedispbusy = 0;
+
 }
 
 

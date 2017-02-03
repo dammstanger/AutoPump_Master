@@ -23,20 +23,21 @@
 /****************************宏定义***********************************************/
 //用一个字变量g_menumark定义菜单，每4位为1菜单级别
 //0级
+#define MENU_HOME				0x0000u
 //1级
-#define MENU_OPERATE			0x1000
-#define MENU_KEYINPUT			0x2000
-#define MENU_HISTORY			0x3000
+#define MENU_OPERATE			0x1000u
+#define MENU_KEYINPUT			0x2000u
+#define MENU_HISTORY			0x3000u
 //2级
-#define MENU_SET				0x2100
+#define MENU_SET				0x2100u
 //3级
-#define MENU_MODE				0x2110
-#define MENU_STARTL				0x2120
-#define MENU_STOPL				0x2130
-#define MENU_DATETIME			0x2140
-#define MENU_KEYSET				0x2150
-#define MENU_BLSET				0x2160
-#define MENU_DEFSET				0x2170
+#define MENU_MODE				0x2110u
+#define MENU_STARTL				0x2120u
+#define MENU_STOPL				0x2130u
+#define MENU_DATETIME			0x2140u
+#define MENU_KEYSET				0x2150u
+#define MENU_BLSET				0x2160u
+#define MENU_DEFSET				0x2170u
 
 
 /****************************类型定义*********************************************/
