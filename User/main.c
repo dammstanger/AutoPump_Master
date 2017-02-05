@@ -129,11 +129,11 @@ void main()
 		if((g_savedat.mode==AUTO)&&(g_sysflag&OFFLINE)==0)
 		{	//
 			if(g_sysflag&WORK&&(g_sysflag&STATUS||								//在工作过程中遇到问题,
-			(sensor_data.possw&FULL)==0||g_level_per>=99||UpTimer1.min>=OVERTIME_MIN))//水满时
+			(sensor_data.possw&FULL)==0||g_level_per>=g_savedat.s_stopl||UpTimer1.min>=OVERTIME_MIN))//水满时
 			{	
 				PUMP_OFF;
 			}									
-			else if(g_sysflag==FREE&&(g_sysflag&SLEEP)==0&&g_level_per<=30) 		//没水时,暂不自动抽水
+			else if(g_sysflag==FREE&&(g_sysflag&SLEEP)==0&&g_level_per<=g_savedat.s_startl) 		//没水时,暂不自动抽水
 			{
 				PUMP_ON;
 			}
@@ -209,7 +209,7 @@ void main()
 				}
 			}
 			else{//--------------空闲状态----------------------------------------
-				SoftUpTimer_Stop(&UpTimer1);					//停止抽水计时
+				SoftUpTimer_Reset(&UpTimer1);					//停止抽水计时
 				if(g_menumark==0)
 				{
 					LCD_BL_OFF;
