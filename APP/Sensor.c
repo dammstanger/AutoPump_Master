@@ -92,6 +92,13 @@ void LevelDatHandle()
 	//获取液位模拟量
 	level_adc = LevelADCHandle();
 	
+	//水位零位未启用时，模拟其作用
+#if 1							
+	if(g_level_per<80)			//等水位降到一半的时候 
+		if(flg_ful_emty)
+			flg_ful_emty = 0;
+#endif
+	
 	//通过液位开关校准液位传感器
 	if((sensor_data.possw&PEC100)==SW_ON)
 	{
@@ -101,13 +108,13 @@ void LevelDatHandle()
 			flg_ful_emty = 1;
 			g_savedat.s_adcmax = level_adc;
 			SendString("max data save.\r\n");		
-			g_savedat.s_adcmax = level_adc;
 			DAT_SaveDat(S_ADCMAX,g_savedat);
 			k = 100.0/(g_savedat.s_adcmax-g_savedat.s_adcmin);
 			b = g_savedat.s_adcmin;
 
 		}
 	}
+#if 0
 	else if((sensor_data.possw&PEC0)==SW_ON)			//零液位点暂未检测
 	{
 		g_level_per =0;
@@ -126,16 +133,15 @@ void LevelDatHandle()
 			b = g_savedat.s_adcmin;
 		}
 	}
+#endif
 	else {		
-
-		flg_ful_emty = 0;
 		level_adc = level_adc - b;
 		if(level_adc<0) level_adc = 0;
 		g_level_per = (uchar)(k*level_adc);
 
 		if(g_level_per>100) g_level_per = 100;
 		
-		SendString("RT level data.\r\n");	
+		SendString("RT level adc-min:\r\n");	
 		SendByteASCII(level_adc>>8);	
 		SendByteASCII(level_adc);	
 		SendString("\r\n");		//
@@ -143,6 +149,7 @@ void LevelDatHandle()
 		SendByteASCII(g_savedat.s_adcmin);	
 		SendString("\r\n");		//
 		SendString("max data.\r\n");	
+		SendByteASCII(g_savedat.s_adcmax>>8);	
 		SendByteASCII(g_savedat.s_adcmax);	
 		SendString("\r\n");		//
 		
@@ -150,6 +157,7 @@ void LevelDatHandle()
 		SendByteASCII(g_level_per);		
 		SendString("\r\n");		//
 	}
+	
 	SendString("possw data:\r\n");			
 	SendByteASCII(sensor_data.possw);
 	SendString("\r\n");

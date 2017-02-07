@@ -1736,6 +1736,9 @@ void GUI_CaseData_Dis(char percent,char refill)
 	uchar fallflag = 0;
 	uchar i;
 	
+	//设置显示忙标志，避免中断打扰
+	homedispbusy = 1;
+	
 	filevel = (signed char)(percent/2.44+1);
 	
 	if(refill)	filevel_last = 0;						//需要重新填充，将历史液位置零
@@ -1750,7 +1753,7 @@ void GUI_CaseData_Dis(char percent,char refill)
 	{		
 		if(fallflag)	filevel_last -= 1;
 		else 			filevel_last += 1;
-		//filevel_last = (fallflag?(filevel_last-i):(fallflag+i));			//为什么不行？
+		//filevel_last = (fallflag?(filevel_last-i):(fallflag+i));	//为什么不行？
 		switch(filevel_last)
 		{
 			case 1 : 
@@ -1837,6 +1840,9 @@ void GUI_CaseData_Dis(char percent,char refill)
 			LCD_fill_Region(17,9,16,16);
 	}
 	percent_last = percent;
+	
+	//复位显示忙标志
+	homedispbusy = 0;
 }
 
 

@@ -139,11 +139,12 @@ void main()
 			}
 		}
 		
+		
 		//界面，指示更新------------------------------------------------------
 		if(ReadSoftTimer(TIMER_2))
 		{	
 			//--------------工作或异常状态----------------------------------------
-			if(g_sysflag&WORK||g_sysflag&STATUS)
+			if(g_sysflag&WORK)
 			{
 				SoftUpTimer_Start(&UpTimer1);			//启动抽水计时
 				DataAqurie();
@@ -203,13 +204,13 @@ void main()
 					}
 					else
 					{
-						GUI_CaseData_Dis(g_level_per,0);		//更新液位，不用太频繁
+						GUI_CaseData_Dis(g_level_per,0);		//如果在主页1上，则更新液位，不用太频繁
 					}
 					SetSoftTimer(TIMER_2,5);					//设置延时
 				}
 			}
 			else{//--------------空闲状态----------------------------------------
-				SoftUpTimer_Reset(&UpTimer1);					//停止抽水计时
+				SoftUpTimer_Reset(&UpTimer1);			//停止抽水计时
 				if(g_menumark==0)
 				{
 					LCD_BL_OFF;
@@ -393,15 +394,15 @@ void DataAqurie()
 		if(2==Pak_Handle())
 		{
 			SendString("valid data received.\r\n");		
-			LED2=0;
+			LED2 = 0;
 			delay100ms();
-			LED2= 1;		
+			LED2 = 1;		
 			TemperDatHandle();
 			LevelDatHandle();
 		}
 	}
 	else{								//接收超时
-		offlinecnt++;
+		
 		if(++offlinecnt==5)				//5次超时判断为离线
 		{
 			g_offlineflag = 1;
