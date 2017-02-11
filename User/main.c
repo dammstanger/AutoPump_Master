@@ -176,7 +176,7 @@ void main()
 					}
 					else alarm_cnt++;
 				}
-				else if(g_level_per>=95)
+				else if(g_level_per>=92)
 				{
 					if(alarm_cnt>=6)					//水要满时，每30s响铃一次						
 					{
