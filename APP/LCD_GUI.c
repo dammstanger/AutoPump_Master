@@ -308,7 +308,10 @@ void GUI_Setting()
  ********************************************************************************/
 void GUI_ModeSetting()
 {
-	char keyval,selitem=1;
+	char keyval;
+	char selitem;
+	
+	selitem = g_savedat.mode;
 	LCD_Clear();
 	LCD_Dis_Char_16_16(1,4,&WordLib_CN[34][0],FALSE);			//模式设置
 	LCD_Dis_Char_16_16(1,5,&WordLib_CN[35][0],FALSE);		
@@ -380,8 +383,10 @@ void GUI_ModeSetting()
  ********************************************************************************/
 void GUI_SRARTLSetting()
 {
-	char keyval,wei = 3,input = 0;
+	char keyval,wei = 3;
+	char input;
 	
+	input = g_savedat.s_startl;
 	LCD_Clear();
 	LCD_Dis_Char_16_16(1,2,&WordLib_CN[13][0],FALSE);		//自动抽水液位设置
 	LCD_Dis_Char_16_16(1,3,&WordLib_CN[14][0],FALSE);		
@@ -461,7 +466,10 @@ void GUI_SRARTLSetting()
  ********************************************************************************/
 void GUI_STOPLSetting()
 {
-	char keyval,wei = 3,input = 100;
+	char keyval,wei = 3;
+	char input;
+	
+	input = g_savedat.s_stopl;
 	
 	LCD_Clear();
 	LCD_Dis_Char_16_16(1,2,&WordLib_CN[13][0],FALSE);		//自动停水液位设置
@@ -731,8 +739,9 @@ void GUI_KEYSetting()
  ********************************************************************************/
 void GUI_BLSetting()
 {
-	char keyval,wei = 1;
+	char keyval,wei;
 	
+	wei = g_savedat.s_baklit_on;
 	LCD_Clear();
 	LCD_Dis_Char_16_16(1,4,&WordLib_CN[57][0],FALSE);		//背光设置
 	LCD_Dis_Char_16_16(1,5,&WordLib_CN[58][0],FALSE);

@@ -100,7 +100,7 @@ void LevelDatHandle()
 #endif
 	
 	//通过液位开关校准液位传感器
-	if((sensor_data.possw&PEC100)==SW_ON)
+	if((sensor_data.possw&FULL)==SW_ON)
 	{
 		g_level_per =100;
 		if(!flg_ful_emty)
